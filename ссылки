@@ -1,0 +1,5 @@
+Статья про то как круто можно настроить menubar с иконками и прочим делом:
+https://dev-gang.ru/article/python-i-pyqt-sozdanie-menu-panelei-instrumentov-i-strok-sostojanija-l7ubf6mm7n/
+
+Документация по PyQt5:
+https://doc.qt.io/qtforpython/PySide6/QtWidgets/QFileDialog.html#PySide6.QtWidgets.PySide6.QtWidgets.QFileDialog.getExistingDirectory
