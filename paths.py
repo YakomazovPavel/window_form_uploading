@@ -38,6 +38,7 @@ full_dir_all_paths = os.path.join(BASE_DIR, DOC_NAME)
 if os.path.exists(full_dir_all_paths):
 	with open(full_dir_all_paths, 'r') as file:
 		ALL_PATHS = json.load(file)
+		print(ALL_PATHS)
 
 		# Проверка ключей полученного dict
 

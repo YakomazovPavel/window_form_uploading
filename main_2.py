@@ -20,10 +20,11 @@ class MainWindow(QMainWindow):
     def action_select_temperature_template(self, key):
         dir = QFileDialog.getOpenFileName(
             self, "Open Directory", BASE_DIR, "Word (*.docx)")
+        print(type(dir[0]))
         print(dir[0])
-        ALL_PATHS[key] = dir[0]
+        print(str(dir[0]))
+        ALL_PATHS[key] = str(dir[0])
         save_all_paths()
-
 
     def action_select_shared_save_directory(self):
         dir = QFileDialog.getExistingDirectory(
@@ -31,7 +32,6 @@ class MainWindow(QMainWindow):
         print(dir)
         ALL_PATHS["dir_shared_save_directory"] = dir
         save_all_paths()
-
 
 
 if __name__ == "__main__":
