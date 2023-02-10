@@ -5,6 +5,8 @@ from MainWindow_V2 import Ui_MainWindow
 from PySide6 import QtUiTools
 from paths import BASE_DIR, ALL_PATHS, save_all_paths
 
+# Добавить переменную, хранящую последний указанный путь пользователем (отрезать файл на конце, если указывался шаблон)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
