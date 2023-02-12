@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self.ui.action_select_many_templates.triggered.connect(
             lambda: self.select_many_templates)
 
-        # Меню выбора файла шаблона
+        # Меню выбора файла шаблона ОЛ
         self.ui.action_select_temperature_template.triggered.connect(
             lambda: self.select_template(key="file_dir_temperature_template"))
 
@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
             lambda: self.select_template(key="file_dir_flow_template"))
 
         self.ui.action_select_level_template.triggered.connect(
-            lambda: self.select_template(key="file_dir_evel_template"))
+            lambda: self.select_template(key="file_dir_level_template"))
 
         self.ui.action_select_analyzer_template.triggered.connect(
             lambda: self.select_template(key="file_dir_analyzer_template"))
@@ -44,6 +44,18 @@ class MainWindow(QMainWindow):
 
         self.ui.action_select_environments_descriptions.triggered.connect(
             lambda: self.select_template(key="file_dir_environments_descriptions"))
+        
+        self.ui.action_select_tsp_template.triggered.connect(
+            lambda: self.select_template(key="file_dir_tsp_template"))
+
+        self.ui.action_select_io_template.triggered.connect(
+            lambda: self.select_template(key="file_dir_io_template"))
+
+        self.ui.action_select_kj_template.triggered.connect(
+            lambda: self.select_template(key="file_dir_kj_template"))
+
+        self.ui.action_select_specification_template.triggered.connect(
+            lambda: self.select_template(key="file_dir_specification_template"))
         
 
         # Меню выбора директории для сохранения
@@ -65,8 +77,6 @@ class MainWindow(QMainWindow):
         self.ui.action_select_specifaication_save_directory.triggered.connect(
             lambda: self.select_directory(key="dir_specifaication_save_directory"))
 
-        
-
 
     # Выбор шаблона
     def select_template(self, key):
@@ -81,21 +91,20 @@ class MainWindow(QMainWindow):
         # Пользователь выбирает директорию, в которой содержаться шаблоны со стандартными названиями
         dir = QFileDialog.getExistingDirectory(self, "Open Directory", self.last_path)
         self.last_path = dir
-        default_templates_name = [
-            ["Температура", "температура", "Temperature", "temperature"],
-            ["Давление", "давление", "Pressure", "pressure"],
-            ["Расход", "", "", ""],
-            ["Уровень", "", "", ""],
-            ["Анализатор", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""],
-            ["", "", "", ""]
-        ]
+        default_templates_names = {
+            "temperature" :              ["Температура", "температура", "Temperature", "temperature"],
+            "pressure" :                 ["Давление", "давление", "Pressure", "pressure"],
+            "flow" :                     ["Расход", "расход", "Flow", "flow"],
+            "level" :                    ["Уровень", "уровень", "Level", "level"],
+            "analyzer" :                 ["Анализатор", "анализатор", "Analyzer", "analyzer"],
+            "control_valve" :            ["Регулирующий клапан", "регулирующий клапар", "ЗРА", "зра"],
+            "shut_off_valve" :           ["Отсечной клапан", "отсечной клапан", "Задвижка", "задвижка", "ЗРА", "зра"],
+            "environments_descriptions" :["Среды", "среды", "Среда", "среда"],
+            "io" :                       ["ИО", "ио", "Информационное обеспечение", "информационное обеспечение"],
+            "tsp" :                      ["ТСП", "тсп", "Таблица соединений и подключений", "таблица соединений и подключений"],
+            "kj" :                       ["КЖ", "кж", "Кабельный журнал", "кабельный журнал"],
+            "specification" :            ["СП", "сп", "Спецификация", "спецификация"],
+        }
         if (os.path.exists(os.path.join(dir, "Температура.docx")) or 
             os.path.exists(os.path.join(dir, "температура.docx"))):
             ALL_PATHS["file_dir_temperature_template"] = ""
@@ -108,6 +117,13 @@ class MainWindow(QMainWindow):
         ALL_PATHS[key] = dir
         self.last_path = dir
         # print(self.last_path)
+
+    
+    # Обработка закрытия приложения
+    def closeEvent(self, event):
+        print("Application is closed")
+        save_all_paths()
+        event.accept()
 
 
 if __name__ == "__main__":

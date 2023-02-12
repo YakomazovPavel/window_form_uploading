@@ -19,7 +19,7 @@ PATH_KEYS = (
 	"file_dir_temperature_template",
 	"file_dir_pressure_template",
 	"file_dir_flow_template",
-	"file_dir_evel_template",
+	"file_dir_level_template",
 	"file_dir_analyzer_template",
 	"file_dir_control_valve_template",
 	"file_dir_shut_off_valve_template",
@@ -38,7 +38,7 @@ full_dir_all_paths = os.path.join(BASE_DIR, DOC_NAME)
 if os.path.exists(full_dir_all_paths):
 	with open(full_dir_all_paths, 'r') as file:
 		ALL_PATHS = json.load(file)
-		print(ALL_PATHS)
+		# print(ALL_PATHS)
 
 		# Проверка ключей полученного dict
 
