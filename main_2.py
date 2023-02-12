@@ -88,6 +88,7 @@ class MainWindow(QMainWindow):
 
     # Выбор нескольких шаблонов
     def select_many_templates(self):
+
         # Пользователь выбирает директорию, в которой содержаться шаблоны со стандартными названиями
         dir = QFileDialog.getExistingDirectory(self, "Open Directory", self.last_path)
         self.last_path = dir
@@ -105,6 +106,12 @@ class MainWindow(QMainWindow):
             "kj" :                       ["КЖ", "кж", "Кабельный журнал", "кабельный журнал"],
             "specification" :            ["СП", "сп", "Спецификация", "спецификация"],
         }
+        # TODO:
+        # Описать поиск всех возможных названий файла шаблона для конкретного типа файла
+        # В цикле пройтись по всем ключам
+        # Во вложенном цикле пройтись по всем синонимам названия файла
+        # Если такой файл существует в указанном пути, записать путь к шаблону в ALL_PATHS
+
         if (os.path.exists(os.path.join(dir, "Температура.docx")) or 
             os.path.exists(os.path.join(dir, "температура.docx"))):
             ALL_PATHS["file_dir_temperature_template"] = ""
