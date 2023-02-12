@@ -1,1 +1,20 @@
-{"dir_shared_save_directory": null, "dir_ol_save_directory": null, "dir_tsp_save_directory": null, "dir_io_save_directory": null, "dir_kj_save_directory": null, "dir_specifaication_save_directory": null, "file_dir_temperature_template": "/Users/pavelakomazov/Downloads/Rewiew article.docx", "file_dir_pressure_template": null, "file_dir_flow_template": null, "file_dir_evel_template": null, "file_dir_analyzer_template": null, "file_dir_control_valve_template": null, "file_dir_shut_off_valve_template": null, "file_dir_environments_descriptions": null, "file_dir_tsp_template": null, "file_dir_io_template": null, "file_dir_kj_template": null, "file_dir_specification_template": null}
+{
+  "dir_shared_save_directory": "/Users/pavelakomazov/Desktop/Python_Project",
+  "dir_ol_save_directory": null,
+  "dir_tsp_save_directory": null,
+  "dir_io_save_directory": null,
+  "dir_kj_save_directory": null,
+  "dir_specifaication_save_directory": null,
+  "file_dir_temperature_template": "/Users/pavelakomazov/Desktop/Python_Project/window_form_uploading/Doc1.docx",
+  "file_dir_pressure_template": null,
+  "file_dir_flow_template": null,
+  "file_dir_evel_template": null,
+  "file_dir_analyzer_template": null,
+  "file_dir_control_valve_template": null,
+  "file_dir_shut_off_valve_template": null,
+  "file_dir_environments_descriptions": null,
+  "file_dir_tsp_template": null,
+  "file_dir_io_template": null,
+  "file_dir_kj_template": null,
+  "file_dir_specification_template": null
+}
