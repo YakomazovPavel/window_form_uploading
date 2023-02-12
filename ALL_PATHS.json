@@ -1,11 +1,11 @@
 {
-  "dir_shared_save_directory": "/Users/pavelakomazov/Desktop/Python_Project",
+  "dir_shared_save_directory": null,
   "dir_ol_save_directory": null,
   "dir_tsp_save_directory": null,
   "dir_io_save_directory": null,
   "dir_kj_save_directory": null,
   "dir_specifaication_save_directory": null,
-  "file_dir_temperature_template": "/Users/pavelakomazov/Desktop/Python_Project/window_form_uploading/Doc1.docx",
+  "file_dir_temperature_template": null,
   "file_dir_pressure_template": null,
   "file_dir_flow_template": null,
   "file_dir_evel_template": null,
