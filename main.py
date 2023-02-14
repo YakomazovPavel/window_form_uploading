@@ -2,7 +2,7 @@ import sys
 import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
-from PySide6 import QtUiTools
+from PySide6 import QtUiTools, QtCore
 from paths import BASE_DIR, ALL_PATHS, save_all_paths
 
 # Добавить переменную, хранящую последний указанный путь пользователем (отрезать файл на конце, если указывался шаблон)
@@ -76,6 +76,14 @@ class MainWindow(QMainWindow):
 
         self.ui.action_select_specifaication_save_directory.triggered.connect(
             lambda: self.select_directory(key="dir_specifaication_save_directory"))
+
+        self.ui.push_btn_uploading_temperature.clicked.connect(
+            lambda: self.unloading('Температура'))
+
+    @QtCore.Slot()
+    def unloading(self, arg):
+        print(arg)
+        # self.text.setText(random.choice(self.hello))
 
 
     # Выбор шаблона
