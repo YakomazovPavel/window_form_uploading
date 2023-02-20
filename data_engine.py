@@ -4,6 +4,22 @@ import numpy as np
 from paths import SETTINGS
 
 
+# Кастомная функция для группировки
+def joinUniqu(x):
+    uniqu = x.drop_duplicates()
+    array = uniqu.values
+    string = ''
+    last = len(array) - 1
+    for i in range(0, len(array)):
+        string += str(array[i])
+        if i != last:
+            string += '\n'
+    return string
+
+
+# df1 = df1.groupby(by='A').agg({'B': joinUniqu, 'C': joinUniqu})
+
+
 # templates = {
 #     'Температура': {
 #         'Позиция': (0, 4),
@@ -398,7 +414,7 @@ def getTemptureForOL():
         return
     else:
         df_ol_table = df[list(SETTINGS['template_temperature'].keys())].copy()
-        return (df_table_list_positions, df_ol_table)
+        return df_table_list_positions, df_ol_table
 
 
 def getPressureForOL():
@@ -595,69 +611,399 @@ def getLevelForOL():
         df_ol_table = df[list(SETTINGS['template_level'].keys())].copy()
         return (df_table_list_positions, df_ol_table)
 
-# TODO: Функция для получения df (2 шт) для формирования ТСП
-# TODO: Функция для получения df (2 шт) для формирования КЖ
-# TODO: Функция для получения df (1 шт) для формирования СП
+
 # TODO: Функция для получения df (1 шт) для формирования ИО
-def get_array_io():
+""""
+"Позиция" - ИО
+"Номер схемы" - ПП
+"Назначение сигнала" - ИО
+"Тип сигнала" - ИО
+"Взрывозащита" - ИО
+"Напряжение питания" - ПП
+"Единицы измерения" - из Температура, Давление, Расход, Уровень, Анализатор, Регулирующий клапан
+"Сигнализация L" - ИО
+"Блокировка LL" - ИО
+"Блокировка HH" - ИО
+"Перечень управляющих воздействий" - ИО
+"Тип канала" - ИО
+"Система" - ПП
+"Уровень безопасности SIL" - из Температура, Давление, Расход, Уровень, Анализатор, Отсечной клапан
+"Примечание" - ИО
+"""
+
+
+def get_io():
     arrya_io = connectiondef('ИО')
-    df_io = pd.DataFrame(arrya_io[1:], columns=arrya_io[0]).fillna('')
+    df_io = pd.DataFrame(arrya_io[1:], columns=arrya_io[0])[
+        ["Позиция",
+         "Тег сигнала",
+         "Назначение сигнала",
+         "Тип сигнала",
+         "Взрывозащита",
+         "Сигнализация L",
+         "Сигнализация H",
+         "Блокировка LL",
+         "Блокировка HH",
+         "Перечень управляющих воздействий",
+         "Тип канала",
+         "Примечание"]].fillna('')
+
     arrya_pp = connectiondef('Перечень приборов')
-    df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[["Позиция", "Номер схемы", "Напряжение питания", "Система"]].fillna('')
+    df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[["Позиция",
+                                                             "Номер схемы",
+                                                             "Напряжение питания",
+                                                             "Система"]].fillna('')
 
     arrya_t = connectiondef('Температура')
-    df_t = pd.DataFrame(arrya_t[1:], columns=arrya_t[0])[["Позиция", "Единицы измерения температуры", "Уровень безопасности SIL"]].fillna('')
-    arrya_p = connectiondef('Давление')
-    df_p = pd.DataFrame(arrya_p[1:], columns=arrya_p[0])[["Позиция", "Единицы измерения давления", "Уровень безопасности SIL"]].fillna('')
-    arrya_f = connectiondef('Расход')
-    df_f = pd.DataFrame(arrya_f[1:], columns=arrya_f[0])[["Позиция", "Единицы измерения расхода", "Уровень безопасности SIL"]].fillna('')
-    arrya_l = connectiondef('Уровень')
-    df_l = pd.DataFrame(arrya_l[1:], columns=arrya_l[0])[["Позиция", "Единицы измерения уровня", "Уровень безопасности SIL"]].fillna('')
-    arrya_a = connectiondef('Анализатор')
-    df_a = pd.DataFrame(arrya_a[1:], columns=arrya_a[0])[["Позиция", "Единицы измерения загазованности", "Уровень безопасности SIL"]].fillna('')
-    arrya_cv = connectiondef('Регулирующий клапан')
-    df_cv = pd.DataFrame(arrya_cv[1:], columns=arrya_cv[0])[["Позиция", "Единицы измерения диапазона регулирования"]].fillna('')
-    arrya_sov = connectiondef('Задвижка')
-    df_sov = pd.DataFrame(arrya_sov[1:], columns=arrya_sov[0])[["Позиция", "Уровень безопасности SIL"]].fillna('')
+    df_t = pd.DataFrame(arrya_t[1:], columns=arrya_t[0])[["Позиция",
+                                                          "Единицы измерения температуры",
+                                                          "Уровень безопасности SIL"]].fillna('')
+    df_t.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
 
-    del(arrya_io, arrya_pp, arrya_t, arrya_p, arrya_f, arrya_l, arrya_a, arrya_cv, arrya_sov)
+    arrya_p = connectiondef('Давление')
+    df_p = pd.DataFrame(arrya_p[1:], columns=arrya_p[0])[["Позиция",
+                                                          "Единицы измерения давления",
+                                                          "Уровень безопасности SIL"]].fillna('')
+    df_p.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+
+    arrya_f = connectiondef('Расход')
+    df_f = pd.DataFrame(arrya_f[1:], columns=arrya_f[0])[["Позиция",
+                                                          "Единицы измерения расхода",
+                                                          "Уровень безопасности SIL"]].fillna('')
+    df_f.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+
+    arrya_l = connectiondef('Уровень')
+    df_l = pd.DataFrame(arrya_l[1:], columns=arrya_l[0])[["Позиция",
+                                                          "Единицы измерения уровня",
+                                                          "Уровень безопасности SIL"]].fillna('')
+    df_l.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+
+    arrya_a = connectiondef('Анализатор')
+    df_a = pd.DataFrame(arrya_a[1:], columns=arrya_a[0])[["Позиция",
+                                                          "Единицы измерения загазованности",
+                                                          "Уровень безопасности SIL"]].fillna('')
+    df_a.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+
+    arrya_cv = connectiondef('Регулирующий клапан')
+    df_cv = pd.DataFrame(arrya_cv[1:], columns=arrya_cv[0])[["Позиция",
+                                                             "Единицы измерения диапазона регулирования"]].fillna('')
+    df_cv.columns = ['Позиция', 'Единицы измерения']
+
+    arrya_sov = connectiondef('Задвижка')
+    df_sov = pd.DataFrame(arrya_sov[1:], columns=arrya_sov[0])[["Позиция",
+                                                                "Уровень безопасности SIL"]].fillna('')
+    df_sov.columns = ['Позиция', 'Единицы измерения']
+
+    del (arrya_io, arrya_pp, arrya_t, arrya_p, arrya_f, arrya_l, arrya_a, arrya_cv, arrya_sov)
+
+    all_device_df = pd.concat([df_t, df_p, df_f, df_l, df_a, df_cv, df_sov]).fillna('')
+
+    all_device_df = all_device_df[all_device_df["Позиция"] != '']
+    all_device_df.reset_index(drop=True, inplace=True)
+    all_device_df.drop_duplicates(subset=["Позиция"], inplace=True)
+
+    del (df_t, df_p, df_f, df_l, df_a, df_cv, df_sov)
 
     df_io = df_io.merge(
         df_pp,
         how='left',
         on='Позиция'
     ).merge(
-        df_t,
+        all_device_df,
         how='left',
         on='Позиция'
-    )
-    print('')
-    # pd.merge(left=df,
-    #          right=df_env,
-    #          how='left',
-    #          left_on='Идентификатор нижней среды',
-    #          right_on='Идентификатор среды',
-    #          indicator=True,
-    #          suffixes=('', '_y')).drop(['_merge'], axis=1).reset_index(drop=True).fillna('')
-    """"
-    Позиция" - ИО
-    "Номер схемы" - ПП
-    "Назначение сигнала" - ИО
-    "Тип сигнала" - ИО
-    "Взрывозащита" - ИО
-    "Напряжение питания" - ПП
-    "Единицы измерения" - из Температура, Давление, Расход, Уровень, Анализатор, Регулирующий клапан
-    "Сигнализация L" - ИО
-    "Блокировка LL" - ИО
-    "Блокировка HH" - ИО
-    "Перечень управляющих воздействий" - ИО
-    "Тип канала" - ИО
-    "Система" - ПП
-    "Уровень безопасности SIL" - из Температура, Давление, Расход, Уровень, Анализатор, Отсечной клапан
-    "Примечание" - ИО
-    """
+    ).fillna('')
+
+    del all_device_df
+
+    return df_io
 
 
+# TODO: Функция для получения df (1 шт) для формирования СП
+"""
+Позиция
+Наименование и тех характеристики
+    Температура
+        'Датчик температуры'
+        'Тип сенсора: ' + 'Тип сенсора' + 'Градуировка НСХ' - Температура
+        'Выходной сигнал: '
+        'Степень защиты: '
+        'Взрывозащита: '
+        'Шкала: '
+    Давление
+        'Измеряемый параметр'
+        'Выходной сигнал: '
+        'Степень защиты: '
+        'Взрывозащита: '
+        'Шкала: '
+        'Комплект'
+    Расход
+        'Метод измерения (тип датчика)'
+        'Выходной сигнал: '
+        'Степень защиты: '
+        'Взрывозащита: '
+        'Шкала: '
+    Уровень
+        'Тип прибора'
+        'Выходной сигнал: '
+        'Степень защиты: '
+        'Взрывозащита: '
+        'Шкала: '
+    Анализатор
+        'Параметр'
+        'Выходной сигнал: '
+        'Напряжение питания: '
+        'Степень защиты: '
+        'Взрывозащита: '
+        'Диапазон измерения: '
+        'Тип сенсора: '
+    Регулирующий клапан
+        
+    Отсечной клапан
+Номер опросного листа (Название документа из SETTINGS для данного типа)
+Код продукции
+Поставщик
+Ед. измерения
+Кол
+Масса
+Примечание - Перечень приборов
+"""
+
+
+def get_spec():
+    arrya_pp = connectiondef('Перечень приборов')
+    df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[[
+        "Позиция",
+        "Примечание",
+        "Назначение"
+    ]].fillna('')
+    del arrya_pp
+    df_pp.drop_duplicates(subset=["Позиция"])
+
+    arrya_io = connectiondef('ИО')
+    df_io = pd.DataFrame(arrya_io[1:], columns=arrya_io[0])[[
+        "Позиция",
+        "Тег сигнала",
+        "Тип сигнала",
+        "Взрывозащита",
+        "Сигнал/питание"
+    ]].fillna('')
+    del arrya_io
+
+    # Получили ИО_сигналы
+    df_io_sig = df_io[df_io["Сигнал/питание"] == "Сигнал"][["Позиция", "Тип сигнала", "Взрывозащита"]]
+    df_io_sig.drop_duplicates(subset=["Позиция"], inplace=True)
+
+    # Получили ИО_питание
+    df_io_power = df_io[df_io["Сигнал/питание"] == "Питание"][["Позиция", "Тип сигнала"]]
+    df_io_power.columns = ["Позиция", "Питание"]
+    # df_io_power.drop_duplicates(subset=["Позиция"], inplace=True)
+    df_io_power.groupby(by='Позиция').agg({'Питание': joinUniqu})
+
+    df_pp = df_pp.merge(
+        df_io_sig,
+        how="left",
+        on="Позиция"
+    ).merge(
+        df_io_power,
+        how="left",
+        on="Позиция"
+    ).fillna('')
+    df_pp.rename({'Назначение':'Наименование'}, inplace=True)
+
+    del df_io, df_io_sig, df_io_power
+    print()
+
+    list_devices = ['Температура', 'Давление', 'Расход', 'Уровень']
+    # list_devices = ['Температура', 'Давление', 'Расход', 'Уровень', 'Анализатор', 'Регулирующий клапан', 'Отсечной клапан']
+
+    result = []
+    sort_n = 0
+
+    for device in list_devices:
+        # Создать соответствующий df
+        arrya = connectiondef(device)
+        df = pd.DataFrame(arrya[1:], columns=arrya[0]).fillna('')
+
+        if device == list_devices[0]:
+            # Температура
+            df = df[[
+                "Позиция",
+                "Тип сенсора",
+                "Градуировка НСХ",
+                "Степень защиты",
+                "Шкала прибора",
+                "Единицы измерения температуры"
+            ]]
+            df.merge(
+                df_pp,
+                how='left',
+                on='Позиция'
+            ).fillna('')
+
+            df['Техническая характеристика'] = 'Датчик температуры' + '\n' + \
+                                               'Тип сенсора: ' + df['Тип сенсора'].astype(str) + ' ' + \
+                                               df['Градуировка НСХ'].astype(str) + '\n' + \
+                                               'Выходной сигнал: ' + df['Тип сигнала'].astype(str) + '\n' + \
+                                               'Степень защиты: ' + df['Степень защиты'].astype(str) + '\n' + \
+                                               'Взрывозащита: ' + df['Взрывозащита'].astype(str) + '\n' + \
+                                               'Шкала: ' + df['Шкала прибора'].astype(str) + \
+                                               df['Единицы измерения температуры'].astype(str) + '\n'
+
+            df['Опросный лист'] = str(SETTINGS["file_name_temperature_ol"])
+            df = [df]
+
+        elif device == list_devices[1]:
+            # Давление
+            df = df[[
+                "Позиция",
+                "Измеряемый параметр",
+                "Степень защиты",
+                "Шкала прибора",
+                "Единицы измерения давления",
+                "Комплект монтажных частей"
+            ]]
+            df['Комплект'] = ''
+            df.loc[df['Тип вентильного блока'] == 'Двухвентильный', 'Комплект'] = 'В комплекте с двухвентильным блоком'
+            df['Техническая характеристика'] = df['Измеряемый параметр'].astype(str) + '\n' + \
+                                               'Выходной сигнал: ' + df['Выходной сигнал'].astype(str) + '\n' + \
+                                               'Степень защиты: ' + df['Степень защиты'].astype(str) + '\n' + \
+                                               'Взрывозащита: ' + df['Исполнение взрывозащиты'].astype(str) + '\n' + \
+                                               'Шкала: ' + df['Шкала прибора, кгс/см2'].astype(str) + '\n' + \
+                                               df['Комплект'].astype(str) + '\n'
+            df['Наименование'] = df['Назначение'].astype(str)
+            # df['Опросный лист'] = list_rd[facility][section]['Давление']
+            df = [df]
+
+        elif device == list_devices[2]:
+            # Расход
+            df = df[[
+                "Позиция",
+                "Метод измерения",
+                "Степень защиты",
+                "Шкала прибора",
+                "Единицы измерения расхода"
+            ]]
+            df['Техническая характеристика'] = df['Метод измерения (тип датчика)'].astype(str) + '\n' + \
+                                               'Выходной сигнал: ' + df['Выходной сигнал'].astype(str) + '\n' + \
+                                               'Степень защиты: ' + df['Степень защиты'].astype(str) + '\n' + \
+                                               'Взрывозащита: ' + df['Исполнение взрывозащиты'].astype(str) + '\n' + \
+                                               'Шкала: ' + df['Диапазон измерения'].astype(str) + '\n'
+            df['Наименование'] = df['Назначение'].astype(str)
+            # df['Опросный лист'] = list_rd[facility][section]['Расход']
+            df = [df]
+        elif device == list_devices[3]:
+            # Уровень
+            df = df[[
+                "Тип прибора",
+                "Степень защиты",
+                "Шкала прибора",
+                "Единицы измерения уровня",
+                "",
+                ""
+            ]]
+            df['Техническая характеристика'] = df['Тип прибора'].astype(str) + ' датчик уровня' + '\n' + \
+                                               'Выходной сигнал: ' + df['Выходной сигнал'].astype(str) + '\n' + \
+                                               'Степень защиты: ' + df['Степень защиты'].astype(str) + '\n' + \
+                                               'Взрывозащита: ' + df['Исполнение взрывозащиты'].astype(str) + '\n' + \
+                                               'Шкала: ' + df['Шкала прибора, мм'].astype(str) + 'мм' + '\n'
+            df['Наименование'] = df['Назначение'].astype(str)
+            # df['Опросный лист'] = list_rd[facility][section]['Уровень']
+            df = [df]
+
+        # elif device == list_devices[4]:
+        #     df['Техническая характеристика'] = df['Параметр'].astype(str) + '\n' + \
+        #                                        'Выходной сигнал: ' + df['Выходной сигнал'].astype(str) + '\n' + \
+        #                                        'Напряжение питания: ' + df['Напряжение питания'].astype(str) + '\n' + \
+        #                                        'Степень защиты: ' + df['Степень защиты'].astype(str) + '\n' + \
+        #                                        'Взрывозащита: ' + df['Исполнение взрывозащиты'].astype(str) + '\n' + \
+        #                                        'Диапазон измерения: ' + df['Диапазон измерения'].astype(str) + df[
+        #                                            'Ед.изм'].astype(str) + '\n' + \
+        #                                        'Тип сенсора: ' + df['Метод измерения (тип сенсора)'].astype(str) + '\n'
+        #     df['Наименование'] = df['Наименование прибора'].astype(str)
+        #     # df['Опросный лист'] = list_rd[facility][section]['Анализатор']
+        #     df = [df]
+        #
+        # elif device == list_devices[5]:
+        #     df_rk = df[df['РК/ОК'] == 'РК'].copy().reset_index(drop=True)
+        #     df_ok = df[df['РК/ОК'] == 'ОК'].copy().reset_index(drop=True)
+        #
+        #     df_rk['Выходной сигнал КВ'] = ''
+        #     df_rk.loc[df_rk['Тип привода'] == 'Пневматический', 'Тип привода'] = 'Регулирующий клапан с пневмоприводом'
+        #     df_rk['Техническая характеристика'] = df_rk['Тип привода'].astype(str) + '\n' + \
+        #                                           'Тип позиционера: ' + df_rk['Тип позиционера'].astype(str) + '\n' + \
+        #                                           'Выходной сигнал: ' + df_rk['Выходной сигнал'].astype(str) + '\n' + \
+        #                                           'Напряжение питания: ' + df_rk.iloc[:, 43].astype(str) + \
+        #                                           'Степень защиты: ' + df_rk.iloc[:, 46].astype(str) + '\n' + \
+        #                                           'Взрывозащита: ' + df_rk.iloc[:, 45].astype(str) + '\n'
+        #     df_rk['Наименование'] = df_rk['Назначение'].astype(str)
+        #     # df_rk['Опросный лист'] = list_rd[facility][section]['Регулирующий клапан']
+        #
+        #     df_ok['Выходной сигнал КВ'] = df_ok.iloc[:, 55].apply(
+        #         lambda x: 'Namur' if x.find('Namur') != -1 else '=24В')
+        #     df_ok.loc[df_ok['Тип привода'] == 'Пневматический', 'Тип привода'] = 'Отсечной клапан с пневмоприводом'
+        #     df_ok['Техническая характеристика'] = df_ok['Тип привода'].astype(str) + '\n' + \
+        #                                           'Напряжение питания: ' + df_ok.iloc[:, 50].astype(str) + '\n' + \
+        #                                           'Степень защиты: ' + df_ok.iloc[:, 52].astype(str) + '\n' + \
+        #                                           'Взрывозащита: ' + df_ok.iloc[:, 51].astype(str) + '\n' + \
+        #                                           'Конечный выключатель: ' + df_ok.iloc[:, 55].astype(str) + '\n' + \
+        #                                           'Выходной сигнал: ' + df_ok['Выходной сигнал КВ'].astype(str) + '\n' + \
+        #                                           'Степень защиты: ' + df_ok.iloc[:, 58].astype(str) + '\n' + \
+        #                                           'Взрывозащита: ' + df_ok.iloc[:, 57].astype(str) + '\n'
+        #
+        #     df_ok['Наименование'] = df_ok['Назначение'].astype(str)
+        #     # df_ok['Опросный лист'] = list_rd[facility][section]['Отсечной клапан']
+        #     df = [df_rk, df_ok]
+        #     # df_rk.reset_index(inplace=True, drop=True)
+        #     # df_ok.reset_index(inplace=True, drop=True)
+        #     # df = pd.concat([df_rk, df_ok], ignore_index=True)
+    #     for item in df:
+    #         item = item[['Позиционное обозначение',
+    #                      'Наименование',
+    #                      'Техническая характеристика',
+    #                      'Опросный лист',
+    #                      'Примечание']].copy()
+    #
+    #         item['Код продукции'] = '-'
+    #         item['Поставщик'] = '-'
+    #         item['Ед.измерения'] = '-'
+    #         item['Кол.'] = '1'
+    #         item['Масса 1 ед., кг'] = ''
+    #         item['Порядок сортировки типа датчика'] = sort_n
+    #         sort_n += 1
+    #         item.reset_index(inplace=True, drop=True)
+    #
+    #         result.append(item)
+    #
+    # result = pd.concat(result, ignore_index=True).reset_index(drop=True)
+    # result.sort_values(['Порядок сортировки типа датчика', 'Позиционное обозначение'],
+    #                    ascending=[True, True]).reset_index(inplace=True, drop=True)
+    # result['Порядок сортировки наименование, техническая характеристика'] = True
+    # result['Индекс'] = result.index
+    # result['Опросный лист'] = 'Опросный лист:\n' + result['Опросный лист']
+    #
+    # result_copy_column = result[['Наименование', 'Индекс']].copy()
+    # result_copy_column.rename({'Наименование': 'Техническая характеристика'}, axis=1, inplace=True)
+    # result_copy_column['Порядок сортировки наименование, техническая характеристика'] = False
+    #
+    # out = pd.concat([result, result_copy_column], ignore_index=True).sort_values(
+    #     ['Индекс', 'Порядок сортировки наименование, техническая характеристика'], ascending=[True, True]).reset_index(
+    #     drop=True)
+    # out = out[['Позиционное обозначение',
+    #            'Техническая характеристика',
+    #            'Опросный лист',
+    #            'Код продукции',
+    #            'Поставщик',
+    #            'Ед.измерения',
+    #            'Кол.',
+    #            'Масса 1 ед., кг',
+    #            'Примечание']].copy()
+    # out.fillna('', inplace=True)
+    # return out.values.tolist()
+    #
+    # # TODO: Функция для получения df (2 шт) для формирования ТСП
+    # # TODO: Функция для получения df (2 шт) для формирования КЖ
+    #
     # templates_key = SETTINGS['template_level'].keys()
     # col_name = df.columns.values
     # if check_column_name(col_name, templates_key):
@@ -673,5 +1019,6 @@ def get_array_io():
 # b = getPressureForOL()
 # c = getFlowForOL()
 # d = getLevelForOL()
-get_array_io()
-# print('')
+# e = get_io()
+f = get_spec()
+print('')

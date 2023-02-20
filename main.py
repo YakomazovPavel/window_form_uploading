@@ -3,7 +3,7 @@ import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
 from PySide6 import QtUiTools, QtCore
-from paths import BASE_DIR, ALL_PATHS, save_all_paths
+from paths import BASE_DIR, SETTINGS
 
 # Добавить переменную, хранящую последний указанный путь пользователем (отрезать файл на конце, если указывался шаблон)
 
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
     # Выбор шаблона
     def select_template(self, key):
         dir = QFileDialog.getOpenFileName(self, "Open Directory", self.last_path, "Word (*.docx)")
-        ALL_PATHS[key] = dir[0]
+        SETTINGS[key] = dir[0]
         self.last_path = os.path.split(dir[0])[0]
         # print(self.last_path)
 
@@ -124,14 +124,14 @@ class MainWindow(QMainWindow):
 
         if (os.path.exists(os.path.join(dir, "Температура.docx")) or 
             os.path.exists(os.path.join(dir, "температура.docx"))):
-            ALL_PATHS["file_dir_temperature_template"] = ""
+            SETTINGS["file_dir_temperature_template"] = ""
         print(self.last_path)
 
     
     # Выбор общей дирректории
     def select_directory(self, key):
         dir = QFileDialog.getExistingDirectory(self, "Open Directory", self.last_path)
-        ALL_PATHS[key] = dir
+        SETTINGS[key] = dir
         self.last_path = dir
         # print(self.last_path)
 
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
     # Обработка закрытия приложения
     def closeEvent(self, event):
         print("Application is closed")
-        save_all_paths()
+        # save_all_paths()
         event.accept()
 
 

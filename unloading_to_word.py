@@ -132,10 +132,29 @@ def unload_ol(template_path, template, save_path, save_name, df_table_list_posit
 
 t_ol = getTemptureForOL()
 print('HI')
+
+
 # unload_ol(template_path, template_name, save_path, save_name, df_table_list_positions, df_ol_table)
-unload_ol(template_path=SETTINGS["file_dir_temperature_template"],
-          template=SETTINGS["template_temperature"],
-          save_path=SETTINGS["dir_ol_save_directory"],
-          save_name=SETTINGS["file_name_temperature_ol"],
-          df_table_list_positions=t_ol[0],
-          df_ol_table=t_ol[1])
+# unload_ol(template_path=SETTINGS["file_dir_temperature_template"],
+#           template=SETTINGS["template_temperature"],
+#           save_path=SETTINGS["dir_ol_save_directory"],
+#           save_name=SETTINGS["file_name_temperature_ol"],
+#           df_table_list_positions=t_ol[0],
+#           df_ol_table=t_ol[1])
+
+# TODO: Заполнение таблиц построчно
+
+def write_table(table, df):
+    # values = df.values
+    count = table._column_count
+    for row_idx in range(1, df.shape[0]):
+        table.add_row()
+    clls = table._cells
+    for row_idx in range(0, df.shape[0]):
+        for column_idx in range(count):
+            # clls[column_idx + row_idx * count].text = str(values[row_idx, column_idx])
+            clls[column_idx + row_idx * count].text = str(df.iloc[row_idx, column_idx].value)
+
+
+def unloading_doc(count_table, dfs, ):
+    pass
