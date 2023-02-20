@@ -824,6 +824,7 @@ def get_spec():
         # Создать соответствующий df
         arrya = connectiondef(device)
         df = pd.DataFrame(arrya[1:], columns=arrya[0]).fillna('')
+        del arrya
 
         if device == list_devices[0]:
             # Температура
@@ -835,7 +836,7 @@ def get_spec():
                 "Шкала прибора",
                 "Единицы измерения температуры"
             ]]
-            df.merge(
+            df = df.merge(
                 df_pp,
                 how='left',
                 on='Позиция'
