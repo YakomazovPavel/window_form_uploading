@@ -19,21 +19,47 @@
 # print(type(path))
 # print(path)
 
-
+from multiprocessing import Process
+import os
 
 
 def wrapper(func):
-	def inner(*args, **kwargs):
-		print('after')
-		func(*args, **kwargs)
-		print('befor')
-	return inner
+    def inner(*args, **kwargs):
+        print('after')
+        func(*args, **kwargs)
+        print('befor')
+
+    return inner
+
 
 @wrapper
 def print_hello(name=''):
-	print(f'Hello, {name}!')
+    print(f'Hello, {name}!')
 
 
-print_hello()
-print('')
-print_hello('Yakomazov Pavel')
+def create_process(func):
+    process = Process(target=func)
+    # process.daemon = True
+    process.daemon = False
+    process.start()
+
+
+def start_process(func, *args, **kwargs):
+    process = Process(target=func, args=args, kwargs=kwargs)
+    process.daemon = False
+    process.start()
+
+
+# @start_process
+def func_0(name):
+    print_hello(f'Yakomazov {name}')
+    print('parent process:', os.getppid())
+    print('process id:', os.getpid())
+
+
+if __name__ == '__main__':
+    start_process(func_0, 'Miha')
+    # print_hello(name='Pavel')
+# print_hello()
+# print('')
+# print_hello('Yakomazov Pavel')
