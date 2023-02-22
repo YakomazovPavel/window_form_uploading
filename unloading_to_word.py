@@ -81,7 +81,8 @@ def cell_style(cell, size):
 #
 #     document.save(f'Выгрузка/Опросные листы/{savePath}.docx')
 
-def unload_ol(template_path, template, save_path, save_name, df_table_list_positions, df_ol_table):
+def unload_ol(template_path, template, save_path, save_name, data_func):
+    df_table_list_positions, df_ol_table = data_func()
     full_save_path = os.path.join(save_path, save_name + '.docx')
 
     # if not (os.path.exists(template_path)):
@@ -130,17 +131,31 @@ def unload_ol(template_path, template, save_path, save_name, df_table_list_posit
     document.save(full_save_path)
 
 
-t_ol = getTemptureForOL()
-print('HI')
-
-
-# unload_ol(template_path, template_name, save_path, save_name, df_table_list_positions, df_ol_table)
+# t_ol = getTemptureForOL()
+# print('HI')
+#
+#
+# # unload_ol(template_path, template_name, save_path, save_name, df_table_list_positions, df_ol_table)
 # unload_ol(template_path=SETTINGS["file_dir_temperature_template"],
 #           template=SETTINGS["template_temperature"],
 #           save_path=SETTINGS["dir_ol_save_directory"],
 #           save_name=SETTINGS["file_name_temperature_ol"],
 #           df_table_list_positions=t_ol[0],
 #           df_ol_table=t_ol[1])
+# print('')
+
+# unload_ol(
+#     template_path=SETTINGS["file_dir_temperature_template"],
+#     template=SETTINGS["template_temperature"],
+#     save_path=SETTINGS["dir_ol_save_directory"],
+#     save_name=SETTINGS["file_name_temperature_ol"],
+#     data_func=getTemptureForOL
+# )
+
+
+# def unload_ol_0(template_path, template_name, save_path, save_name, data_func):
+#     temp_res = data_func()
+
 
 # TODO: Заполнение таблиц построчно
 

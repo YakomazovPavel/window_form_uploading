@@ -36,6 +36,9 @@ def wrapper(func):
 def print_hello(name=''):
     print(f'Hello, {name}!')
 
+def print_hello_2():
+    print(f'Hello,!!')
+
 
 def create_process(func):
     process = Process(target=func)
@@ -44,21 +47,23 @@ def create_process(func):
     process.start()
 
 
-def start_process(func, *args, **kwargs):
+def deamon_start_process(func, *args, **kwargs):
     process = Process(target=func, args=args, kwargs=kwargs)
     process.daemon = False
     process.start()
 
 
 # @start_process
-def func_0(name):
-    print_hello(f'Yakomazov {name}')
+def func_0(name, age, year, none=None,):
+    print_hello(f'Yakomazov {name}, {age}, {year}, {none}')
     print('parent process:', os.getppid())
     print('process id:', os.getpid())
 
 
 if __name__ == '__main__':
-    start_process(func_0, 'Miha')
+    # deamon_start_process(func_0, 'Miha', age=22.5, year=2028)
+    deamon_start_process(print_hello_2)
+
     # print_hello(name='Pavel')
 # print_hello()
 # print('')
