@@ -646,7 +646,11 @@ def get_io():
          "Блокировка HH",
          "Перечень управляющих воздействий",
          "Тип канала",
-         "Примечание"]].fillna('')
+         "Примечание",
+         "Шкаф",
+         "Модуль",
+         "Канал",
+         "Тип сх.подкл."]].fillna('')
 
     arrya_pp = connectiondef('Перечень приборов')
     df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[["Позиция",
@@ -657,26 +661,34 @@ def get_io():
     arrya_t = connectiondef('Температура')
     df_t = pd.DataFrame(arrya_t[1:], columns=arrya_t[0])[["Позиция",
                                                           "Единицы измерения температуры",
-                                                          "Уровень безопасности SIL"]].fillna('')
-    df_t.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+                                                          "Уровень безопасности SIL",
+                                                          "Шкала прибора"]].fillna('')
+    df_t.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL', 'Шкала']
 
     arrya_p = connectiondef('Давление')
     df_p = pd.DataFrame(arrya_p[1:], columns=arrya_p[0])[["Позиция",
                                                           "Единицы измерения давления",
-                                                          "Уровень безопасности SIL"]].fillna('')
-    df_p.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+                                                          "Уровень безопасности SIL",
+                                                          "Шкала прибора"]].fillna('')
+    df_p.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL', 'Шкала']
 
     arrya_f = connectiondef('Расход')
     df_f = pd.DataFrame(arrya_f[1:], columns=arrya_f[0])[["Позиция",
                                                           "Единицы измерения расхода",
-                                                          "Уровень безопасности SIL"]].fillna('')
-    df_f.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+                                                          "Уровень безопасности SIL",
+                                                          "Шкала прибора",
+                                                          "Единицы измерения шкалы прибора"]].fillna('')
+    df_f['Шкала'] = df_f["Шкала прибора"].astype(str) + ' ' + df_f["Единицы измерения шкалы прибора"].astype(str)
+    df_f.rename({'Единицы измерения расхода': 'Единицы измерения'}, axis=1, inplace=True)
+    df_f = df_f[['Позиция', 'Единицы измерения', 'Уровень безопасности SIL', 'Шкала']].copy()
+    # df_f.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
 
     arrya_l = connectiondef('Уровень')
     df_l = pd.DataFrame(arrya_l[1:], columns=arrya_l[0])[["Позиция",
                                                           "Единицы измерения уровня",
-                                                          "Уровень безопасности SIL"]].fillna('')
-    df_l.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL']
+                                                          "Уровень безопасности SIL",
+                                                          "Шкала прибора"]].fillna('')
+    df_l.columns = ['Позиция', 'Единицы измерения', 'Уровень безопасности SIL', "Шкала"]
 
     arrya_a = connectiondef('Анализатор')
     df_a = pd.DataFrame(arrya_a[1:], columns=arrya_a[0])[["Позиция",
@@ -715,6 +727,26 @@ def get_io():
     ).fillna('')
 
     del all_device_df
+
+    df_io = df_io[['Позиция',
+                   'Назначение сигнала',
+                   'Тип сигнала',
+                   'Взрывозащита',
+                   'Единицы измерения',
+                   'Шкала',
+                   'Блокировка LL',
+                   'Сигнализация L',
+                   'Сигнализация H',
+                   'Блокировка HH',
+                   'Тип канала',
+                   'Шкаф',
+                   'Модуль',
+                   'Канал',
+                   'Тег сигнала',
+                   'Перечень управляющих воздействий',
+                   'Тип сх.подкл.',
+                   'Примечание']].copy()
+    df_io.sort_values(by=['Шкаф', 'Модуль', 'Канал'], ascending=[True, True, True], inplace=True)
 
     return df_io
 
@@ -782,6 +814,7 @@ def get_spec():
     ]].fillna('')
     del arrya_pp
     df_pp.drop_duplicates(subset=["Позиция"])
+    df_pp['Количество'] = '1'
 
     # Столбцы из ИО
 
@@ -945,7 +978,7 @@ def get_spec():
     df['sort_row'] = 1
     df = pd.concat([df, df_naz]).sort_values(by=['index', 'sort_row'], ascending=[True, True]).fillna('')
     del df_naz
-    df[['Код продукции', 'Поставщик', 'Ед.измерения', 'Кол', 'Масса']] = ('', '', '', '1', '')
+    df[['Код продукции', 'Поставщик', 'Ед.измерения', 'Масса']] = ('', '', '', '')
 
     df = df[[
         'Позиция',
@@ -954,7 +987,7 @@ def get_spec():
         'Код продукции',
         'Поставщик',
         'Ед.измерения',
-        'Кол',
+        'Количество',
         'Масса',
         'Примечание'
     ]].copy().reset_index(drop=True)
@@ -1018,313 +1051,313 @@ def get_tsp():
 
 # TODO: Функция для получения df (2 шт) для формирования КЖ
 
-def get_kj():
-
-    # Столбцы из ТСП
-
-    arrya_tsp = connectiondef('ТСП')
-    df_tsp = pd.DataFrame(arrya_tsp[1:], columns=arrya_tsp[0])[[
-        'Тег сигнала',
-        'Кабель местный',
-        'Соединительная коробка',
-        'Кабель магистральный',
-        'Шкаф'
-    ]]
-    del arrya_tsp
-
-    # Столбцы из КЖ
-
-    arrya_kj = connectiondef('КЖ')
-    df_kj = pd.DataFrame(arrya_kj[1:], columns=arrya_kj[0])[[
-        'Номер кабеля',
-        'Тип кабеля',
-        'Марка кабеля',
-        'Диаметр кабеля',
-        'Длина кабеля',
-        'Труба',
-        'Длина трубы',
-        'Металлорукав',
-        'Длина металлорукава',
-        'Примечание'
-    ]]
-    del arrya_kj
-
-    # True для всех прямых кабелей
-    df_tsp_first = df_tsp_first[(df_tsp_first['Необходимость проектирования'] != 'Нет') &
-                                (df_tsp_first['Необходимость проектирования'] != 'нет')].copy()
-
-    df_tsp_first['Прямой кабель в шкаф'] = [True if x == '' or x == '-' else False for x in
-                                            df_tsp_first['Соединительная коробка']]
-
-    arrya_cab = connectiondef('Кабели', facility)
-    df_cab = pd.DataFrame(arrya_cab[2:], columns=arrya_cab[1])
-    df_cab = df_cab[(df_cab['Номер кабеля'] != '') &
-                    (df_cab['Выгрузить в Word?'] == 'Да') &
-                    (df_cab['Секция'] == section)]
-
-    df_cab = df_cab[~df_cab.duplicated(subset=['Номер кабеля'])]
-
-    for col in df_cab.columns:
-        df_cab.rename(columns={col: f'df_cab_{col}'}, inplace=True)
-
-    # Построение фрейма данных местных кабелей df_mc
-    df_tsp = df_tsp_first[(df_tsp_first['Кабель местный (номер)'] != '')]
-    # Удаление дубликатов
-    df_tsp = df_tsp[~df_tsp.duplicated(subset=['Кабель местный (номер)', ])]
-
-    # False для всех местных кабелей
-    df_tsp['Магистральный кабель в шкаф'] = False
-    # Если коробки нет - пишем шкаф
-    m = (df_tsp['Соединительная коробка'] == '') | (df_tsp['Соединительная коробка'] == '-')
-    df_tsp.loc[m, ['Соединительная коробка', 'Шкаф']] = df_tsp.loc[m, ['Шкаф', 'Шкаф']].to_numpy()
-
-    for col in df_tsp.columns:
-        df_tsp.rename(columns={col: f'df_tsp_{col}'}, inplace=True)
-
-    df_mc = pd.merge(left=df_tsp,
-                     right=df_cab,
-                     how='left',
-                     on=None,
-                     left_on='df_tsp_Кабель местный (номер)',
-                     right_on='df_cab_Номер кабеля',
-                     left_index=False, right_index=False, sort=False,
-                     suffixes=('_x', '_y'), copy=True, indicator=False,
-                     validate=None)
-    df_mc.fillna('', inplace=True)
-
-    df_mc = df_mc[df_mc['df_cab_Номер кабеля'] != '']
-
-    df_mc = df_mc[['df_tsp_Кабель местный (номер)',
-                   'df_tsp_Позиционное обозначение прибора',
-                   'df_tsp_Соединительная коробка',
-                   'df_cab_Марка',
-                   'df_cab_Длина кабеля',
-                   'df_cab_Труба',
-                   'df_cab_Длина трубы',
-                   'df_cab_Металлорукав',
-                   'df_cab_Длина металлорукава',
-                   'df_cab_Примечание',
-                   'df_tsp_Соединительная коробка',
-                   'df_tsp_Магистральный кабель в шкаф',
-                   'df_tsp_Прямой кабель в шкаф',
-                   'df_tsp_Система РСУ / ПАЗ']]
-
-    rename_df(df_mc, ['Номер кабеля',
-                      'Откуда',
-                      'Куда',
-                      'Марка',
-                      'Длина кабеля',
-                      'Труба',
-                      'Длина трубы',
-                      'Металлорукав',
-                      'Длина металлорукава',
-                      'Примечание',
-                      'Коробка',
-                      'Магистральный кабель в шкаф',
-                      'Прямой кабель в шкаф',
-                      'Система'])
-
-    # Построение фреймай данных с магистральными кабелями df_mgc
-
-    df_tsp_mg = df_tsp_first[
-        (df_tsp_first['Магистральный кабель (номер)'] != '')]
-    # Удаление дубликатов
-    df_tsp_mg = df_tsp_mg[~df_tsp_mg.duplicated(subset=['Магистральный кабель (номер)', ])]
-
-    # True для всех магистральных кабелей
-    df_tsp_mg['Магистральный кабель в шкаф'] = True
-
-    for col in df_tsp_mg.columns:
-        df_tsp_mg.rename(columns={col: f'df_tsp_mg_{col}'}, inplace=True)
-
-    df_mgc = pd.merge(left=df_tsp_mg,
-                      right=df_cab,
-                      how='left',
-                      on=None,
-                      left_on='df_tsp_mg_Магистральный кабель (номер)',
-                      right_on='df_cab_Номер кабеля',
-                      left_index=False, right_index=False, sort=False,
-                      suffixes=('_x', '_y'), copy=True, indicator=False,
-                      validate=None)
-    df_mgc.fillna('', inplace=True)
-    df_mgc = df_mgc[df_mgc['df_cab_Номер кабеля'] != '']
-
-    df_mgc = df_mgc[['df_tsp_mg_Магистральный кабель (номер)',
-                     'df_tsp_mg_Соединительная коробка',
-                     'df_tsp_mg_Шкаф',
-                     'df_cab_Марка',
-                     'df_cab_Длина кабеля',
-                     'df_cab_Труба',
-                     'df_cab_Длина трубы',
-                     'df_cab_Металлорукав',
-                     'df_cab_Длина металлорукава',
-                     'df_cab_Примечание',
-                     'df_tsp_mg_Соединительная коробка',
-                     'df_tsp_mg_Магистральный кабель в шкаф',
-                     'df_tsp_mg_Прямой кабель в шкаф',
-                     'df_tsp_mg_Система РСУ / ПАЗ']]
-    rename_df(df_mgc, ['Номер кабеля',
-                       'Откуда',
-                       'Куда',
-                       'Марка',
-                       'Длина кабеля',
-                       'Труба',
-                       'Длина трубы',
-                       'Металлорукав',
-                       'Длина металлорукава',
-                       'Примечание',
-                       'Коробка',
-                       'Магистральный кабель в шкаф',
-                       'Прямой кабель в шкаф',
-                       'Система'])
-
-    # Объединяем df_mc и df_mgc в одну таблицу
-    df_out = pd.concat([df_mc, df_mgc], ignore_index=True)
-    #
-    #
-    #
-    # df_out['Номер кабеля'].to_excel('qweqwe.xlsx')
-    #
-    #
-    #
-    df_out = df_out.sort_values(
-        ['Система', 'Прямой кабель в шкаф', 'Коробка', 'Магистральный кабель в шкаф', 'Номер кабеля'],
-        ascending=[False, True, True, True, True])
-    df_out.reset_index(drop=True, inplace=True)
-
-    """Создание таблицы спецификации для кабельного журнала
-    (первая таблица в файлах КЖ)
-
-    Создать таблицы ['Наименование', 'Количество', 'Порядок выгрузки типа'] для каждого из типа уникальных позиций марок_кабеля, маталорукавов, трубопроводов, кабеля заземления
-    Посчитать длинну каждой позиции
-    Объединить их в одну таблицу (записи друг по другом) .concat
-    Добавить столбец ['Порядок выгрузки описание\наименование'] указать значение True
-    Создать таблицу с описанием каждого типа
-    Переименовать столбцы в соответсвии с таблицей перечисления позиций всех типов ['Наименование', 'Длина', 'Порядок выгрузки типа'] отсутствуюзие столбцы - пустые
-    Добавить столбец ['Порядок выгрузки описание\наименование'] указать значение True
-    Дополнить таблицу столбцом ['Описание'] с диска используя .merge
-    Отсортировать по ['Порядок выгрузки типа', 'Описание']
-    """
-
-    # Копируем датасет
-    df = df_out
-
-    for item in ['Длина кабеля', 'Длина трубы', 'Длина металлорукава']:
-        df[item] = pd.to_numeric(df[item], errors='coerce', downcast='integer').fillna(0)
-
-    marc = df[(df['Марка'] != '-') & (df['Марка'] != '') & (df['Марка'] != ' ')][['Марка', 'Длина кабеля']].groupby(
-        by=['Марка']).agg({'Длина кабеля': ['sum']}).reset_index()
-    tubing = df[(df['Труба'] != '-') & (df['Труба'] != '') & (df['Труба'] != ' ')][
-        ['Труба', 'Длина трубы']].groupby(
-        by=['Труба']).agg({'Длина трубы': ['sum']}).reset_index()
-    metalhose = df[(df['Металлорукав'] != '-') & (df['Металлорукав'] != '') & (df['Металлорукав'] != ' ')][
-        ['Металлорукав', 'Длина металлорукава']].groupby(by=['Металлорукав']).agg(
-        {'Длина металлорукава': ['sum']}).reset_index()
-
-    marc.columns = marc.columns.droplevel(1)
-    tubing.columns = tubing.columns.droplevel(1)
-    metalhose.columns = metalhose.columns.droplevel(1)
-
-    rename_df(marc, ['Наименование', 'Количество'])
-    rename_df(tubing, ['Наименование', 'Количество'])
-    rename_df(metalhose, ['Наименование', 'Количество'])
-
-    marc['Порядок выгрузки типа'] = 0
-    tubing['Порядок выгрузки типа'] = 1
-    metalhose['Порядок выгрузки типа'] = 2
-
-    # df_out['Номер кабеля'].to_excel('qweqwe.xlsx')
-
-    # Расчет длины кабеля заземления
-
-    count_devices = \
-        df_tsp_first['Позиционное обозначение прибора'][((df_tsp_first['Необходимость проектирования'] == 'да') |
-                                                         (df_tsp_first['Необходимость проектирования'] == 'Да') |
-                                                         (df_tsp_first['Необходимость проектирования'] == 'Нов') |
-                                                         (df_tsp_first['Необходимость проектирования'] == 'Нов.') |
-                                                         (df_tsp_first[
-                                                              'Необходимость проектирования'] == 'Да. В приложении пусто') |
-                                                         (df_tsp_first[
-                                                              'Необходимость проектирования'] == 'Нов. (HAZOP)')) &
-                                                        (df_tsp_first['Позиционное обозначение прибора'] != '') &
-                                                        (df_tsp_first['Позиционное обозначение прибора'] != '-') &
-                                                        (df_tsp_first[
-                                                             'Позиционное обозначение прибора'] != 'HOLD') &
-                                                        (df_tsp_first['Позиционное обозначение прибора'] != '?') &
-                                                        (df_tsp_first['№ Секции'] == section)][
-            ~df_tsp_first.duplicated(subset=['Позиционное обозначение прибора', ])].shape[0]
-
-    count_junctionbox = \
-    df_tsp_first['Соединительная коробка'][((df_tsp_first['Необходимость проектирования'] == 'да') |
-                                            (df_tsp_first['Необходимость проектирования'] == 'Да') |
-                                            (df_tsp_first['Необходимость проектирования'] == 'Нов') |
-                                            (df_tsp_first['Необходимость проектирования'] == 'Нов.') |
-                                            (df_tsp_first[
-                                                 'Необходимость проектирования'] == 'Да. В приложении пусто') |
-                                            (df_tsp_first['Необходимость проектирования'] == 'Нов. (HAZOP)')) &
-                                           (df_tsp_first['Соединительная коробка'] != '') &
-                                           (df_tsp_first['Соединительная коробка'] != '-') &
-                                           (df_tsp_first['Соединительная коробка'] != 'нет места установки') &
-                                           (df_tsp_first['Соединительная коробка'] != '?') &
-                                           (df_tsp_first['Соединительная коробка'] != 'HOLD') &
-                                           (df_tsp_first['№ Секции'] == section)][
-        ~df_tsp_first.duplicated(subset=['Соединительная коробка', ])].shape[0]
-
-    len_grounding_cable = 3 * (count_devices + count_junctionbox)
-    grounding_cable = {'Наименование': ['ПуГВ 1х4'],
-                       'Количество': [int(len_grounding_cable)],
-                       'Порядок выгрузки типа': [3]}
-
-    df_grounding_cable = pd.DataFrame(grounding_cable)
-
-    result_df = pd.concat([marc, tubing, metalhose, df_grounding_cable], ignore_index=True).reset_index(
-        drop=True).sort_values(
-        ['Порядок выгрузки типа', 'Наименование'], ascending=[True, True]).reset_index(drop=True)
-
-    result_df['Порядок выгрузки описание\наименование'] = True
-
-    # Описание марок кабелей берелся только из установки ЛУ-6У
-
-    cabel_descriptions = connectiondef('Марки кабелей', 'ЛК-6У')
-    df_cabel_descriptions = pd.DataFrame(cabel_descriptions[1:], columns=cabel_descriptions[0])
-    for item in ['Колво групп', 'Колво жил в группе', 'Диаметр жилы']:
-        df_cabel_descriptions[item] = pd.to_numeric(df_cabel_descriptions[item], errors='coerce',
-                                                    downcast='float').fillna(0)
-    result_df = pd.merge(left=result_df,
-                         right=df_cabel_descriptions,
-                         how='left',
-                         on='Наименование').reset_index(drop=True)
-    # result_df = result_df.sort_values(['Порядок выгрузки типа', 'Описание', 'Наименование'],
-
-    result_df = result_df.sort_values(
-        ['Порядок выгрузки типа', 'Марка', 'Тип', 'Окончание', 'Колво групп', 'Колво жил в группе', 'Диаметр жилы'],
-        ascending=[True, False, False, False, True, True, True]).reset_index(drop=True)
-
-    result_df['Индекс'] = result_df.index
-    result_df['Количество'] = result_df['Количество'].astype(int)
-
-    df_cabel_descriptions_column = pd.DataFrame()
-    df_cabel_descriptions_column['Наименование'] = result_df['Описание']
-    df_cabel_descriptions_column['Индекс'] = result_df['Индекс']
-    df_cabel_descriptions_column['Описание'] = ''
-    df_cabel_descriptions_column['Количество'] = ''
-    df_cabel_descriptions_column['Примечание'] = ''
-    df_cabel_descriptions_column['Порядок выгрузки описание\наименование'] = False
-    df_cabel_descriptions_column.reset_index(drop=True)
-
-    result_df = pd.concat([result_df, df_cabel_descriptions_column], ignore_index=True).reset_index(
-        drop=True).sort_values(
-        ['Индекс', 'Порядок выгрузки описание\наименование'], ascending=[True, True])
-    result_df['Пустой'] = ''
-
-    result_df = result_df[['Пустой', 'Наименование', 'Количество', 'Примечание']]
-    result_df.fillna('', inplace=True)
-    result_df = result_df[~result_df.duplicated(subset=['Наименование', ])].reset_index(drop=True)
-
-    for item in ['Длина кабеля', 'Длина трубы', 'Длина металлорукава']:
-        df[item].replace(0, '-', inplace=True)
-
-    return [df_out.values.tolist(), result_df.values.tolist()]
+# def get_kj():
+#
+#     # Столбцы из ТСП
+#
+#     arrya_tsp = connectiondef('ТСП')
+#     df_tsp = pd.DataFrame(arrya_tsp[1:], columns=arrya_tsp[0])[[
+#         'Тег сигнала',
+#         'Кабель местный',
+#         'Соединительная коробка',
+#         'Кабель магистральный',
+#         'Шкаф'
+#     ]]
+#     del arrya_tsp
+#
+#     # Столбцы из КЖ
+#
+#     arrya_kj = connectiondef('КЖ')
+#     df_kj = pd.DataFrame(arrya_kj[1:], columns=arrya_kj[0])[[
+#         'Номер кабеля',
+#         'Тип кабеля',
+#         'Марка кабеля',
+#         'Диаметр кабеля',
+#         'Длина кабеля',
+#         'Труба',
+#         'Длина трубы',
+#         'Металлорукав',
+#         'Длина металлорукава',
+#         'Примечание'
+#     ]]
+#     del arrya_kj
+#
+#     # True для всех прямых кабелей
+#     df_tsp_first = df_tsp_first[(df_tsp_first['Необходимость проектирования'] != 'Нет') &
+#                                 (df_tsp_first['Необходимость проектирования'] != 'нет')].copy()
+#
+#     df_tsp_first['Прямой кабель в шкаф'] = [True if x == '' or x == '-' else False for x in
+#                                             df_tsp_first['Соединительная коробка']]
+#
+#     arrya_cab = connectiondef('Кабели', facility)
+#     df_cab = pd.DataFrame(arrya_cab[2:], columns=arrya_cab[1])
+#     df_cab = df_cab[(df_cab['Номер кабеля'] != '') &
+#                     (df_cab['Выгрузить в Word?'] == 'Да') &
+#                     (df_cab['Секция'] == section)]
+#
+#     df_cab = df_cab[~df_cab.duplicated(subset=['Номер кабеля'])]
+#
+#     for col in df_cab.columns:
+#         df_cab.rename(columns={col: f'df_cab_{col}'}, inplace=True)
+#
+#     # Построение фрейма данных местных кабелей df_mc
+#     df_tsp = df_tsp_first[(df_tsp_first['Кабель местный (номер)'] != '')]
+#     # Удаление дубликатов
+#     df_tsp = df_tsp[~df_tsp.duplicated(subset=['Кабель местный (номер)', ])]
+#
+#     # False для всех местных кабелей
+#     df_tsp['Магистральный кабель в шкаф'] = False
+#     # Если коробки нет - пишем шкаф
+#     m = (df_tsp['Соединительная коробка'] == '') | (df_tsp['Соединительная коробка'] == '-')
+#     df_tsp.loc[m, ['Соединительная коробка', 'Шкаф']] = df_tsp.loc[m, ['Шкаф', 'Шкаф']].to_numpy()
+#
+#     for col in df_tsp.columns:
+#         df_tsp.rename(columns={col: f'df_tsp_{col}'}, inplace=True)
+#
+#     df_mc = pd.merge(left=df_tsp,
+#                      right=df_cab,
+#                      how='left',
+#                      on=None,
+#                      left_on='df_tsp_Кабель местный (номер)',
+#                      right_on='df_cab_Номер кабеля',
+#                      left_index=False, right_index=False, sort=False,
+#                      suffixes=('_x', '_y'), copy=True, indicator=False,
+#                      validate=None)
+#     df_mc.fillna('', inplace=True)
+#
+#     df_mc = df_mc[df_mc['df_cab_Номер кабеля'] != '']
+#
+#     df_mc = df_mc[['df_tsp_Кабель местный (номер)',
+#                    'df_tsp_Позиционное обозначение прибора',
+#                    'df_tsp_Соединительная коробка',
+#                    'df_cab_Марка',
+#                    'df_cab_Длина кабеля',
+#                    'df_cab_Труба',
+#                    'df_cab_Длина трубы',
+#                    'df_cab_Металлорукав',
+#                    'df_cab_Длина металлорукава',
+#                    'df_cab_Примечание',
+#                    'df_tsp_Соединительная коробка',
+#                    'df_tsp_Магистральный кабель в шкаф',
+#                    'df_tsp_Прямой кабель в шкаф',
+#                    'df_tsp_Система РСУ / ПАЗ']]
+#
+#     rename_df(df_mc, ['Номер кабеля',
+#                       'Откуда',
+#                       'Куда',
+#                       'Марка',
+#                       'Длина кабеля',
+#                       'Труба',
+#                       'Длина трубы',
+#                       'Металлорукав',
+#                       'Длина металлорукава',
+#                       'Примечание',
+#                       'Коробка',
+#                       'Магистральный кабель в шкаф',
+#                       'Прямой кабель в шкаф',
+#                       'Система'])
+#
+#     # Построение фреймай данных с магистральными кабелями df_mgc
+#
+#     df_tsp_mg = df_tsp_first[
+#         (df_tsp_first['Магистральный кабель (номер)'] != '')]
+#     # Удаление дубликатов
+#     df_tsp_mg = df_tsp_mg[~df_tsp_mg.duplicated(subset=['Магистральный кабель (номер)', ])]
+#
+#     # True для всех магистральных кабелей
+#     df_tsp_mg['Магистральный кабель в шкаф'] = True
+#
+#     for col in df_tsp_mg.columns:
+#         df_tsp_mg.rename(columns={col: f'df_tsp_mg_{col}'}, inplace=True)
+#
+#     df_mgc = pd.merge(left=df_tsp_mg,
+#                       right=df_cab,
+#                       how='left',
+#                       on=None,
+#                       left_on='df_tsp_mg_Магистральный кабель (номер)',
+#                       right_on='df_cab_Номер кабеля',
+#                       left_index=False, right_index=False, sort=False,
+#                       suffixes=('_x', '_y'), copy=True, indicator=False,
+#                       validate=None)
+#     df_mgc.fillna('', inplace=True)
+#     df_mgc = df_mgc[df_mgc['df_cab_Номер кабеля'] != '']
+#
+#     df_mgc = df_mgc[['df_tsp_mg_Магистральный кабель (номер)',
+#                      'df_tsp_mg_Соединительная коробка',
+#                      'df_tsp_mg_Шкаф',
+#                      'df_cab_Марка',
+#                      'df_cab_Длина кабеля',
+#                      'df_cab_Труба',
+#                      'df_cab_Длина трубы',
+#                      'df_cab_Металлорукав',
+#                      'df_cab_Длина металлорукава',
+#                      'df_cab_Примечание',
+#                      'df_tsp_mg_Соединительная коробка',
+#                      'df_tsp_mg_Магистральный кабель в шкаф',
+#                      'df_tsp_mg_Прямой кабель в шкаф',
+#                      'df_tsp_mg_Система РСУ / ПАЗ']]
+#     rename_df(df_mgc, ['Номер кабеля',
+#                        'Откуда',
+#                        'Куда',
+#                        'Марка',
+#                        'Длина кабеля',
+#                        'Труба',
+#                        'Длина трубы',
+#                        'Металлорукав',
+#                        'Длина металлорукава',
+#                        'Примечание',
+#                        'Коробка',
+#                        'Магистральный кабель в шкаф',
+#                        'Прямой кабель в шкаф',
+#                        'Система'])
+#
+#     # Объединяем df_mc и df_mgc в одну таблицу
+#     df_out = pd.concat([df_mc, df_mgc], ignore_index=True)
+#     #
+#     #
+#     #
+#     # df_out['Номер кабеля'].to_excel('qweqwe.xlsx')
+#     #
+#     #
+#     #
+#     df_out = df_out.sort_values(
+#         ['Система', 'Прямой кабель в шкаф', 'Коробка', 'Магистральный кабель в шкаф', 'Номер кабеля'],
+#         ascending=[False, True, True, True, True])
+#     df_out.reset_index(drop=True, inplace=True)
+#
+#     """Создание таблицы спецификации для кабельного журнала
+#     (первая таблица в файлах КЖ)
+#
+#     Создать таблицы ['Наименование', 'Количество', 'Порядок выгрузки типа'] для каждого из типа уникальных позиций марок_кабеля, маталорукавов, трубопроводов, кабеля заземления
+#     Посчитать длинну каждой позиции
+#     Объединить их в одну таблицу (записи друг по другом) .concat
+#     Добавить столбец ['Порядок выгрузки описание\наименование'] указать значение True
+#     Создать таблицу с описанием каждого типа
+#     Переименовать столбцы в соответсвии с таблицей перечисления позиций всех типов ['Наименование', 'Длина', 'Порядок выгрузки типа'] отсутствуюзие столбцы - пустые
+#     Добавить столбец ['Порядок выгрузки описание\наименование'] указать значение True
+#     Дополнить таблицу столбцом ['Описание'] с диска используя .merge
+#     Отсортировать по ['Порядок выгрузки типа', 'Описание']
+#     """
+#
+#     # Копируем датасет
+#     df = df_out
+#
+#     for item in ['Длина кабеля', 'Длина трубы', 'Длина металлорукава']:
+#         df[item] = pd.to_numeric(df[item], errors='coerce', downcast='integer').fillna(0)
+#
+#     marc = df[(df['Марка'] != '-') & (df['Марка'] != '') & (df['Марка'] != ' ')][['Марка', 'Длина кабеля']].groupby(
+#         by=['Марка']).agg({'Длина кабеля': ['sum']}).reset_index()
+#     tubing = df[(df['Труба'] != '-') & (df['Труба'] != '') & (df['Труба'] != ' ')][
+#         ['Труба', 'Длина трубы']].groupby(
+#         by=['Труба']).agg({'Длина трубы': ['sum']}).reset_index()
+#     metalhose = df[(df['Металлорукав'] != '-') & (df['Металлорукав'] != '') & (df['Металлорукав'] != ' ')][
+#         ['Металлорукав', 'Длина металлорукава']].groupby(by=['Металлорукав']).agg(
+#         {'Длина металлорукава': ['sum']}).reset_index()
+#
+#     marc.columns = marc.columns.droplevel(1)
+#     tubing.columns = tubing.columns.droplevel(1)
+#     metalhose.columns = metalhose.columns.droplevel(1)
+#
+#     rename_df(marc, ['Наименование', 'Количество'])
+#     rename_df(tubing, ['Наименование', 'Количество'])
+#     rename_df(metalhose, ['Наименование', 'Количество'])
+#
+#     marc['Порядок выгрузки типа'] = 0
+#     tubing['Порядок выгрузки типа'] = 1
+#     metalhose['Порядок выгрузки типа'] = 2
+#
+#     # df_out['Номер кабеля'].to_excel('qweqwe.xlsx')
+#
+#     # Расчет длины кабеля заземления
+#
+#     count_devices = \
+#         df_tsp_first['Позиционное обозначение прибора'][((df_tsp_first['Необходимость проектирования'] == 'да') |
+#                                                          (df_tsp_first['Необходимость проектирования'] == 'Да') |
+#                                                          (df_tsp_first['Необходимость проектирования'] == 'Нов') |
+#                                                          (df_tsp_first['Необходимость проектирования'] == 'Нов.') |
+#                                                          (df_tsp_first[
+#                                                               'Необходимость проектирования'] == 'Да. В приложении пусто') |
+#                                                          (df_tsp_first[
+#                                                               'Необходимость проектирования'] == 'Нов. (HAZOP)')) &
+#                                                         (df_tsp_first['Позиционное обозначение прибора'] != '') &
+#                                                         (df_tsp_first['Позиционное обозначение прибора'] != '-') &
+#                                                         (df_tsp_first[
+#                                                              'Позиционное обозначение прибора'] != 'HOLD') &
+#                                                         (df_tsp_first['Позиционное обозначение прибора'] != '?') &
+#                                                         (df_tsp_first['№ Секции'] == section)][
+#             ~df_tsp_first.duplicated(subset=['Позиционное обозначение прибора', ])].shape[0]
+#
+#     count_junctionbox = \
+#     df_tsp_first['Соединительная коробка'][((df_tsp_first['Необходимость проектирования'] == 'да') |
+#                                             (df_tsp_first['Необходимость проектирования'] == 'Да') |
+#                                             (df_tsp_first['Необходимость проектирования'] == 'Нов') |
+#                                             (df_tsp_first['Необходимость проектирования'] == 'Нов.') |
+#                                             (df_tsp_first[
+#                                                  'Необходимость проектирования'] == 'Да. В приложении пусто') |
+#                                             (df_tsp_first['Необходимость проектирования'] == 'Нов. (HAZOP)')) &
+#                                            (df_tsp_first['Соединительная коробка'] != '') &
+#                                            (df_tsp_first['Соединительная коробка'] != '-') &
+#                                            (df_tsp_first['Соединительная коробка'] != 'нет места установки') &
+#                                            (df_tsp_first['Соединительная коробка'] != '?') &
+#                                            (df_tsp_first['Соединительная коробка'] != 'HOLD') &
+#                                            (df_tsp_first['№ Секции'] == section)][
+#         ~df_tsp_first.duplicated(subset=['Соединительная коробка', ])].shape[0]
+#
+#     len_grounding_cable = 3 * (count_devices + count_junctionbox)
+#     grounding_cable = {'Наименование': ['ПуГВ 1х4'],
+#                        'Количество': [int(len_grounding_cable)],
+#                        'Порядок выгрузки типа': [3]}
+#
+#     df_grounding_cable = pd.DataFrame(grounding_cable)
+#
+#     result_df = pd.concat([marc, tubing, metalhose, df_grounding_cable], ignore_index=True).reset_index(
+#         drop=True).sort_values(
+#         ['Порядок выгрузки типа', 'Наименование'], ascending=[True, True]).reset_index(drop=True)
+#
+#     result_df['Порядок выгрузки описание\наименование'] = True
+#
+#     # Описание марок кабелей берелся только из установки ЛУ-6У
+#
+#     cabel_descriptions = connectiondef('Марки кабелей', 'ЛК-6У')
+#     df_cabel_descriptions = pd.DataFrame(cabel_descriptions[1:], columns=cabel_descriptions[0])
+#     for item in ['Колво групп', 'Колво жил в группе', 'Диаметр жилы']:
+#         df_cabel_descriptions[item] = pd.to_numeric(df_cabel_descriptions[item], errors='coerce',
+#                                                     downcast='float').fillna(0)
+#     result_df = pd.merge(left=result_df,
+#                          right=df_cabel_descriptions,
+#                          how='left',
+#                          on='Наименование').reset_index(drop=True)
+#     # result_df = result_df.sort_values(['Порядок выгрузки типа', 'Описание', 'Наименование'],
+#
+#     result_df = result_df.sort_values(
+#         ['Порядок выгрузки типа', 'Марка', 'Тип', 'Окончание', 'Колво групп', 'Колво жил в группе', 'Диаметр жилы'],
+#         ascending=[True, False, False, False, True, True, True]).reset_index(drop=True)
+#
+#     result_df['Индекс'] = result_df.index
+#     result_df['Количество'] = result_df['Количество'].astype(int)
+#
+#     df_cabel_descriptions_column = pd.DataFrame()
+#     df_cabel_descriptions_column['Наименование'] = result_df['Описание']
+#     df_cabel_descriptions_column['Индекс'] = result_df['Индекс']
+#     df_cabel_descriptions_column['Описание'] = ''
+#     df_cabel_descriptions_column['Количество'] = ''
+#     df_cabel_descriptions_column['Примечание'] = ''
+#     df_cabel_descriptions_column['Порядок выгрузки описание\наименование'] = False
+#     df_cabel_descriptions_column.reset_index(drop=True)
+#
+#     result_df = pd.concat([result_df, df_cabel_descriptions_column], ignore_index=True).reset_index(
+#         drop=True).sort_values(
+#         ['Индекс', 'Порядок выгрузки описание\наименование'], ascending=[True, True])
+#     result_df['Пустой'] = ''
+#
+#     result_df = result_df[['Пустой', 'Наименование', 'Количество', 'Примечание']]
+#     result_df.fillna('', inplace=True)
+#     result_df = result_df[~result_df.duplicated(subset=['Наименование', ])].reset_index(drop=True)
+#
+#     for item in ['Длина кабеля', 'Длина трубы', 'Длина металлорукава']:
+#         df[item].replace(0, '-', inplace=True)
+#
+#     return [df_out.values.tolist(), result_df.values.tolist()]
 
 
 # a = getTemptureForOL()
@@ -1333,4 +1366,8 @@ def get_kj():
 # d = getLevelForOL()
 # e = get_io()
 # f = get_spec()
+# print('')
+
+# a = get_spec()
+# b = get_io()
 # print('')

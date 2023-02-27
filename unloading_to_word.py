@@ -2,7 +2,7 @@ import os
 
 from docx import Document
 from copy import deepcopy
-from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL
+from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from paths import SETTINGS
@@ -159,17 +159,50 @@ def unload_ol(template_path, template, save_path, save_name, data_func):
 
 # TODO: Заполнение таблиц построчно
 
-def write_table(table, df):
+def write_table(table, df, not_centr_column, row_shift=0):
     # values = df.values
     count = table._column_count
-    for row_idx in range(1, df.shape[0]):
+    for row_idx in range(1, df.shape[0] + row_shift):
         table.add_row()
     clls = table._cells
     for row_idx in range(0, df.shape[0]):
         for column_idx in range(count):
             # clls[column_idx + row_idx * count].text = str(values[row_idx, column_idx])
-            clls[column_idx + row_idx * count].text = str(df.iloc[row_idx, column_idx].value)
+            cell = clls[column_idx + (row_idx + row_shift) * count]
+            cell.text = str(df.iloc[row_idx, column_idx])
+            # Выравнивание
+            if column_idx not in not_centr_column:
+                paragra_ph = cell.paragraphs[0]
+                paragra_ph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
 
-def unloading_doc(count_table, dfs, ):
-    pass
+# Выгрузка спецификации
+def unloading_doc(template_path, save_path, save_name, data_func, not_centr_column=[], row_shift=0):
+    full_save_path = os.path.join(save_path, save_name + '.docx')
+    document = Document(template_path)
+    table = document.tables[-1]
+    df = data_func()
+    write_table(table, df, not_centr_column, row_shift)
+    document.save(full_save_path)
+    print(f'Документ {save_name}.docx выгружен')
+
+
+# def
+
+# Работает!
+# unloading_doc(
+#     template_path=SETTINGS['file_dir_specification_template'],
+#     save_path=SETTINGS['dir_specifaication_save_directory'],
+#     save_name=SETTINGS['file_name_specification'],
+#     data_func=get_spec,
+#     not_centr_column=[1]
+# )
+
+# Работает!
+unloading_doc(
+    template_path=SETTINGS['file_dir_io_template'],
+    save_path=SETTINGS['dir_io_save_directory'],
+    save_name=SETTINGS['file_name_io'],
+    data_func=get_io,
+    row_shift=2
+)

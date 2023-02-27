@@ -12,6 +12,55 @@ DOC_NAME = 'SETTINGS.json'
 # TODO: Осуществлять проверку построчно (по ключам), если не удовлетворяет условию заменить это значение на дефолтное
 # TODO: Создать singlton-класс для SETTINGS с методами чтения значения из json-файла, и сохранения в файл
 
+DEFAULT_SETTINGS = {
+# Пути для дирректорий сохранения
+    "dir_shared_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка"),
+    "dir_ol_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы"),
+    "dir_tsp_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка"),
+    "dir_io_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка"),
+    "dir_kj_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка"),
+    "dir_specifaication_save_directory": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка"),
+
+    # Пути для файлов шаблонов
+    "file_dir_temperature_template": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы", "Температура.docx"),
+    "file_dir_pressure_template": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы", "Давление.docx"),
+    "file_dir_flow_template": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы", "Расход.docx"),
+    "file_dir_level_template": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы", "Уровень.docx"),
+    "file_dir_analyzer_template": "",
+    "file_dir_control_valve_template": "",
+    "file_dir_shut_off_valve_template": "",
+    "file_dir_environments_descriptions": os.path.join(BASE_DIR, "Выгрузка", "Выгрузка", "Опросные листы", "Среды.docx"),
+    "file_dir_tsp_template": os.path.join(BASE_DIR, "Выгрузка", "Шаблоны", "ТСП.docx"),
+    "file_dir_io_template": os.path.join(BASE_DIR, "Выгрузка", "Шаблоны", "ИО.docx"),
+    "file_dir_kj_template": os.path.join(BASE_DIR, "Выгрузка", "Шаблоны", "КЖ.docx"),
+    "file_dir_specification_template": os.path.join(BASE_DIR, "Выгрузка", "Шаблоны", "Спецификация.docx"),
+
+    # Имена для выгружаемых файлов
+    "file_name_temperature_ol": "193-РП-АТХ1.ОЛ1",
+    "file_name_pressure_ol": "193-РП-АТХ1.ОЛ2",
+    "file_name_flow_ol": "193-РП-АТХ1.ОЛ3",
+    "file_name_level_ol": "193-РП-АТХ1.ОЛ4",
+    "file_name_analyzer_ol": "",
+    "file_name_control_valve_ol": "",
+    "file_name_shut_off_valve_ol": "",
+    "file_name_tsp": "193-РП-АТХ2.С6",
+    "file_name_io": "193-РП-АТХ2.В1",
+    "file_name_kj": "193-РП-АТХ1.КЖ",
+    "file_name_specification": "193-РП-АТХ1.СО",
+
+    # Шаблоны
+    "template_temperature": "",
+    "template_pressure": "",
+    "template_flow": "",
+    "template_level": "",
+    "template_control_valve": "",
+    "template_shut_off_valve": "",
+    "template_tsp": "",
+    "template_io": "",
+    "template_kj": "",
+    "template_specification": ""
+}
+
 PATH_KEYS = (
 
     # Пути для дирректорий сохранения
@@ -97,3 +146,4 @@ SETTINGS = create_json_file(os.path.join(BASE_DIR, DOC_NAME), PATH_KEYS)
 # print(a['Позиция'])
 
 # save_json_file(os.path.join(BASE_DIR, DOC_NAME), SETTINGS)
+# print('')
