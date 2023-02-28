@@ -833,6 +833,7 @@ def get_spec():
     # df_io_sig.drop_duplicates(subset=["Позиция"], inplace=True)
     df_io_sig.groupby(by='Позиция').agg({"Тип сигнала": joinUniqu})
 
+    # TODO: Исправить получение питания прибора
     # Получили ИО_питание
     df_io_power = df_io[df_io["Сигнал/питание"] == "Питание"][["Позиция", "Тип сигнала"]]
     df_io_power.columns = ["Позиция", "Питание"]
@@ -1005,9 +1006,9 @@ def get_tsp():
     arrya_pp = connectiondef('Перечень приборов')
     df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[[
         "Позиция",
-        "Назначение",
-        "Система"
+        "Назначение"
     ]].fillna('')
+    df_pp.drop_duplicates(subset=['Позиция'], inplace=True)
     del arrya_pp
 
     # Столбцы из ТСП
@@ -1029,7 +1030,8 @@ def get_tsp():
         'Клемма',
         'Примечание'
     ]]
-    del arrya_tsp
+    df_tsp['Клеммник клемма шкафа'] = df_tsp['Клеммник шкафа'].astype(str) + ':' + df_tsp['Клемма'].astype(str)
+    # del arrya_tsp
 
     # Столбцы из ИО
 
@@ -1038,16 +1040,33 @@ def get_tsp():
         "Позиция",
         "Тег сигнала",
         "Тип сигнала",
-        "Взрывозащита",
-        "Сигнал/питание"
+        "Взрывозащита"
     ]].fillna('')
-    del arrya_io
+    # df_io.drop_duplicates(subset=['Тег сигнала'], inplace=True)
+    df_io.groupby(by=['Позиция']).agg({
+        "Тег сигнала": joinUniqu,
+        "Тип сигнала": joinUniqu,
+        "Взрывозащита": joinUniqu
+    })
 
-    df_tsp_one = ''
-    df_tsp_two = ''
+    # del arrya_io
 
-    return df_tsp_one, df_tsp_two
+    df_tsp = df_pp.merge(
+        df_tsp,
+        how="left",
+        on="Позиция"
+    ).merge(
+        df_io,
+        how="left",
+        on="Позиция"
+    )
 
+    # del df_io
+
+    return df_tsp
+
+
+a = get_tsp()
 
 # TODO: Функция для получения df (2 шт) для формирования КЖ
 
