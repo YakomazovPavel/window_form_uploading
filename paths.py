@@ -142,6 +142,7 @@ def save_json_file(path_to_file, dictionary):
 # full_dir_all_settings = os.path.join(BASE_DIR, DOC_NAME)
 
 SETTINGS = create_json_file(os.path.join(BASE_DIR, DOC_NAME), PATH_KEYS)
+print('')
 # a = SETTINGS['template_temperature']
 # print(a['Позиция'])
 

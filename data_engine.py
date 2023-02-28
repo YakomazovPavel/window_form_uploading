@@ -1,6 +1,8 @@
 from connections import connectiondef
 import pandas as pd
 import numpy as np
+
+
 from paths import SETTINGS
 
 
@@ -1008,7 +1010,9 @@ def get_tsp():
         "Позиция",
         "Назначение"
     ]].fillna('')
+    df_pp = df_pp[df_pp['Позиция'] != '']
     df_pp.drop_duplicates(subset=['Позиция'], inplace=True)
+
     del arrya_pp
 
     # Столбцы из ТСП
@@ -1029,8 +1033,8 @@ def get_tsp():
         'Клеммник шкафа',
         'Клемма',
         'Примечание'
-    ]]
-    df_tsp['Клеммник клемма шкафа'] = df_tsp['Клеммник шкафа'].astype(str) + ':' + df_tsp['Клемма'].astype(str)
+    ]].fillna('')
+    df_tsp = df_tsp[df_tsp['Позиция'] != '']
     # del arrya_tsp
 
     # Столбцы из ИО
@@ -1042,12 +1046,13 @@ def get_tsp():
         "Тип сигнала",
         "Взрывозащита"
     ]].fillna('')
+    df_io = df_io[df_io['Тег сигнала'] != '']
     # df_io.drop_duplicates(subset=['Тег сигнала'], inplace=True)
-    df_io.groupby(by=['Позиция']).agg({
-        "Тег сигнала": joinUniqu,
+    df_io = df_io.groupby(by=['Тег сигнала']).agg({
+        # "Тег сигнала": joinUniqu,
         "Тип сигнала": joinUniqu,
         "Взрывозащита": joinUniqu
-    })
+    }).reset_index()
 
     # del arrya_io
 
@@ -1058,15 +1063,37 @@ def get_tsp():
     ).merge(
         df_io,
         how="left",
-        on="Позиция"
-    )
+        on="Тег сигнала"
+    ).fillna('')
+
+    df_tsp['Клеммник:клемма шкафа'] = np.where((
+            (df_tsp['Клеммник шкафа'] != '') & (df_tsp['Клемма'] != '')),
+        df_tsp['Клеммник шкафа'].astype(str) + ':' + df_tsp['Клемма'].astype(str), '')
+    df_tsp = df_tsp[[
+        'Позиция',
+        'Назначение',
+        'Тип сигнала',
+        'Взрывозащита',
+        'Клемма прибора',
+        'Жила местного кабеля',
+        'Кабель местный',
+        'Соединительная коробка',
+        'Клемма коробки',
+        'Жила кабеля магистрального',
+        'Кабель магистральный',
+        'Шкаф',
+        'Примечание',
+        'Клеммник:клемма шкафа'
+    ]].copy()
+
+    # df_tsp['Клеммник клемма шкафа'] = df_tsp['Клеммник шкафа'].astype(str) + ':' + df_tsp['Клемма'].astype(str)
 
     # del df_io
 
     return df_tsp
 
 
-a = get_tsp()
+# a = get_tsp()
 
 # TODO: Функция для получения df (2 шт) для формирования КЖ
 
