@@ -3,9 +3,10 @@ import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
 from PySide6 import QtUiTools, QtCore
-from paths import BASE_DIR, SETTINGS
+from paths import DOC_NAME, BASE_DIR, SETTINGS, save_json_file
 from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL
 from unloading_to_word import unload_ol
+import multiprocessing
 from multiprocessing import Process
 
 
@@ -203,12 +204,14 @@ class MainWindow(QMainWindow):
     # Обработка закрытия приложения
     def closeEvent(self, event):
         print("Application is closed")
+        save_json_file(os.path.join(BASE_DIR, DOC_NAME), SETTINGS)
 
         # save_all_paths()
         event.accept()
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     app = QApplication(sys.argv)
 
     window = MainWindow()

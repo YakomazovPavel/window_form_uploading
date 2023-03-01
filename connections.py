@@ -3,7 +3,8 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'credentials.json')
+# SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'credentials.json')
+SERVICE_ACCOUNT_FILE = '.\\credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 CREDENTIALS = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 SHEET_ID = '1zz7GVckuuoLFdDCAu8aqRtGZcPSZE4mfZzeyAgltGpY'

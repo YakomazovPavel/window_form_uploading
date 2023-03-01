@@ -135,8 +135,8 @@ def create_json_file(path, keys):
 
 def save_json_file(path_to_file, dictionary):
     with open(path_to_file, 'w') as f:
-        # json.dump(dictionary, f, cls=None, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '))
-        json.dump(dictionary, f, ensure_ascii=False)
+        json.dump(dictionary, f, cls=None, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '))
+        # json.dump(dictionary, f, ensure_ascii=False)
 
 
 # full_dir_all_settings = os.path.join(BASE_DIR, DOC_NAME)

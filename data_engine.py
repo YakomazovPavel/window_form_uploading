@@ -1091,7 +1091,6 @@ def get_tsp():
 
     return df_tsp
 
-
 # TODO: Функция для получения df (2 шт) для формирования КЖ
 
 def get_kj():
@@ -1243,10 +1242,10 @@ def get_kj():
     # отсортировать по
 
     # del arrya_kj
-    print('')
+    # print('')
 
 
-b = get_kj()
+# b = get_kj()
 # return df_kj, df_kj_list
 # def get_kj():
 #
