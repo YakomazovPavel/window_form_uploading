@@ -215,10 +215,10 @@ def unloading_doc(template_path, save_path, save_name, data_func, not_centr_colu
 # )
 
 # Работает!
-unloading_doc(
-    template_path=SETTINGS['file_dir_tsp_template'],
-    save_path=SETTINGS['dir_tsp_save_directory'],
-    save_name=SETTINGS['file_name_tsp'],
-    data_func=get_tsp,
-    row_shift=1
-)
+# unloading_doc(
+#     template_path=SETTINGS['file_dir_tsp_template'],
+#     save_path=SETTINGS['dir_tsp_save_directory'],
+#     save_name=SETTINGS['file_name_tsp'],
+#     data_func=get_tsp,
+#     row_shift=1
+# )

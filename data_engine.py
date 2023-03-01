@@ -2,7 +2,6 @@ from connections import connectiondef
 import pandas as pd
 import numpy as np
 
-
 from paths import SETTINGS
 
 
@@ -1093,10 +1092,162 @@ def get_tsp():
     return df_tsp
 
 
-# a = get_tsp()
-
 # TODO: Функция для получения df (2 шт) для формирования КЖ
 
+def get_kj():
+    arrya_cab = connectiondef('Кабель')
+    df_cab = pd.DataFrame(arrya_cab[1:], columns=arrya_cab[0])[[
+        "Наименование",
+        "Описание",
+        "Марка",
+        "Тип",
+        "Количество групп",
+        "Количество жил в группе",
+        "Сечение жилы",
+        "Наружный диаметр,мм ",
+        "Окончание",
+        "Примечание"
+    ]].fillna('')
+    df_cab = df_cab[df_cab['Наименование'] != '']
+    df_cab.drop_duplicates(subset=['Наименование'], inplace=True)
+
+    arrya_kj = connectiondef('КЖ')
+    df_kj = pd.DataFrame(arrya_kj[1:], columns=arrya_kj[0])[[
+        "Номер кабеля",
+        # "Тип кабеля",
+        "Марка кабеля",
+        # "Диаметр кабеля",
+        "Длина кабеля",
+        "Труба",
+        "Длина трубы",
+        "Металлорукав",
+        "Длина металлорукава",
+        # "Список кабельных лотков",
+        "Примечание"
+    ]].fillna('')
+    df_kj = df_kj[df_kj['Номер кабеля'] != '']
+    df_kj.drop_duplicates(subset=['Номер кабеля'], inplace=True)
+
+    arrya_tsp = connectiondef('ТСП')
+    df_tsp = pd.DataFrame(arrya_tsp[1:], columns=arrya_tsp[0])[[
+        'Позиция',
+        'Кабель местный',
+        'Соединительная коробка',
+        'Кабель магистральный',
+        'Шкаф'
+    ]].fillna('')
+
+    df_tsp = df_tsp[df_tsp['Позиция'] != '']
+    df_tsp.replace('-', '', inplace=True)
+    df_tsp.drop_duplicates(subset=[
+        'Позиция',
+        'Кабель местный',
+        'Соединительная коробка',
+        'Кабель магистральный',
+        'Шкаф'
+    ], inplace=True)
+
+    arrya_io = connectiondef('ИО')
+    df_io = pd.DataFrame(arrya_io[1:], columns=arrya_io[0])[[
+        "Позиция",
+        "Тег сигнала",
+        "Тип сигнала",
+        "Взрывозащита"
+    ]].fillna('')
+    df_io = df_io[df_io['Тег сигнала'] != '']
+
+    # Таблица соединений для местных кабелей [Позиция-кабель-коробка]
+    df_mes_cab = df_tsp[
+        # (df_tsp['Позиция'] != '') &
+        (df_tsp['Кабель местный'] != '') &
+        (df_tsp['Соединительная коробка'] != '')
+        ][[
+        'Позиция',
+        'Кабель местный',
+        'Соединительная коробка'
+    ]].copy()
+
+    df_mag_cab = df_tsp[
+        (df_tsp['Соединительная коробка'] != '') &
+        (df_tsp['Кабель магистральный'] != '') &
+        (df_tsp['Шкаф'] != '')
+        ][[
+        'Соединительная коробка',
+        'Кабель магистральный',
+        'Шкаф'
+    ]].copy()
+
+    df_prm_cab_mes = df_tsp[
+        # (df_tsp['Позиция'] != '') &
+        (df_tsp['Кабель местный'] != '') &
+        (df_tsp['Соединительная коробка'] == '') &
+        (df_tsp['Шкаф'] != '')
+        ][[
+        'Позиция',
+        'Кабель местный',
+        'Шкаф'
+    ]].copy()
+
+    df_prm_cab_mag = df_tsp[
+        # (df_tsp['Позиция'] != '') &
+        (df_tsp['Кабель магистральный'] != '') &
+        (df_tsp['Соединительная коробка'] == '') &
+        (df_tsp['Шкаф'] != '')
+        ][[
+        'Позиция',
+        'Кабель магистральный',
+        'Шкаф'
+    ]].copy()
+
+    for df in [df_mes_cab, df_mag_cab, df_prm_cab_mes, df_prm_cab_mag]:
+        df.columns = ['Откуда', 'Номер кабеля', 'Куда']
+
+    df_mes_cab['Порядок выгрузки'] = 0
+    df_mag_cab['Порядок выгрузки'] = 1
+    df_prm_cab_mes['Порядок выгрузки'] = 2
+    df_prm_cab_mag['Порядок выгрузки'] = 3
+
+    df = pd.concat([
+        df_mes_cab,
+        df_mag_cab,
+        df_prm_cab_mes,
+        df_prm_cab_mag
+    ]).reset_index(drop=True)
+
+    del df_mes_cab, df_mag_cab, df_prm_cab_mes, df_prm_cab_mag
+
+    df = df.merge(
+        df_kj,
+        how="left",
+        on='Номер кабеля'
+    ).fillna('')
+
+    df_cab_length = df[df["Марка кабеля"] != ''].copy()
+    df_cab_length["Длина кабеля"] = pd.to_numeric(
+        df_cab_length["Длина кабеля"],
+        downcast='integer',
+        errors='coerce'
+    )
+    df_cab_length["Длина кабеля"].replace(np.NAN, 0, inplace=True)
+    df_cab_length = df_cab_length.groupby(by=['Марка кабеля']).agg({"Длина кабеля": 'sum'}).reset_index()
+    df_cab_length["Длина кабеля"] = df_cab_length["Длина кабеля"].astype('int').astype('str')
+
+    df_cab_length = df_cab_length.merge(
+        df_cab,
+        how='left',
+        left_on='Марка кабеля',
+        right_on='Наименование'
+    ).fillna('')
+
+    # TODO: Сгруппировать марки кабелей по описанию
+    # отсортировать по
+
+    # del arrya_kj
+    print('')
+
+
+b = get_kj()
+# return df_kj, df_kj_list
 # def get_kj():
 #
 #     # Столбцы из ТСП
