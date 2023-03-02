@@ -1,14 +1,11 @@
 import os
-
 from docx import Document
 from copy import deepcopy
-from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp
+# from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from paths import SETTINGS
 
-
-# from data_engine import templates
 
 def delete_paragraph(paragraph):
     p = paragraph._element
@@ -157,7 +154,7 @@ def unload_ol(template_path, template, save_path, save_name, data_func):
 #     temp_res = data_func()
 
 
-# TODO: Заполнение таблиц построчно
+# Заполнение таблиц построчно
 
 def write_table(table, df, not_centr_column, row_shift=0):
     # values = df.values
@@ -184,6 +181,7 @@ def write_table(table, df, not_centr_column, row_shift=0):
 
 
 # Выгрузка спецификации
+
 def unloading_doc(template_path, save_path, save_name, data_func, not_centr_column=[], row_shift=0):
     full_save_path = os.path.join(save_path, save_name + '.docx')
     document = Document(template_path)
@@ -192,7 +190,6 @@ def unloading_doc(template_path, save_path, save_name, data_func, not_centr_colu
     write_table(table, df, not_centr_column, row_shift)
     document.save(full_save_path)
     print(f'Документ {save_name}.docx выгружен')
-
 
 # def
 
