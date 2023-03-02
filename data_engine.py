@@ -1090,7 +1090,6 @@ def get_tsp():
 
 
 def get_kj():
-
     arrya_kj = connectiondef('КЖ')
     df_kj = pd.DataFrame(arrya_kj[1:], columns=arrya_kj[0])[[
         "Номер кабеля",
@@ -1223,7 +1222,7 @@ def get_kj():
         "Примечание"
     ]].fillna('')
     del arrya_trub_desc
-    df_trub_desc = df_trub_desc[(df_trub_desc['Марка'] != '')&(df_trub_desc['Марка'] != '-')]
+    df_trub_desc = df_trub_desc[(df_trub_desc['Марка'] != '') & (df_trub_desc['Марка'] != '-')]
     df_trub_desc.drop_duplicates(subset=['Марка'], inplace=True)
 
     arrya_metal_desc = connectiondef('Металлорукав')
@@ -1233,9 +1232,8 @@ def get_kj():
         "Примечание"
     ]].fillna('')
     del arrya_metal_desc
-    df_metal_desc = df_metal_desc[(df_metal_desc['Марка'] != '')&(df_metal_desc['Марка'] != '-')]
+    df_metal_desc = df_metal_desc[(df_metal_desc['Марка'] != '') & (df_metal_desc['Марка'] != '-')]
     df_metal_desc.drop_duplicates(subset=['Марка'], inplace=True)
-
 
     del df_mes_cab, df_mag_cab, df_prm_cab_mes, df_prm_cab_mag
 
@@ -1263,13 +1261,15 @@ def get_kj():
         errors='coerce'
     )
 
-    df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]] = df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]].replace(np.NAN, 0)
-    df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]] = df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]].round(0).astype(int)
-
+    df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]] = df[
+        ["Длина кабеля", "Длина трубы", "Длина металлорукава"]].replace(np.NAN, 0)
+    df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]] = df[
+        ["Длина кабеля", "Длина трубы", "Длина металлорукава"]].round(0).astype(int)
 
     df_cab_length = df[df["Марка кабеля"] != ''][["Марка кабеля", "Длина кабеля"]].copy()
     df_trub_length = df[(df["Труба"] != '') & (df["Труба"] != '-')][["Труба", "Длина трубы"]].copy()
-    df_metal_length = df[(df["Металлорукав"] != '') & (df["Металлорукав"] != '-')][["Металлорукав", "Длина металлорукава"]].copy()
+    df_metal_length = df[(df["Металлорукав"] != '') & (df["Металлорукав"] != '-')][
+        ["Металлорукав", "Длина металлорукава"]].copy()
 
     df_cab_length.columns = ["Позиция", "Длина"]
     df_trub_length.columns = ["Позиция", "Длина"]
@@ -1283,7 +1283,6 @@ def get_kj():
 
     # df_cab_length.columns = df_cab_length.columns.droplevel(1)
 
-
     df_cab_length['Порядок выгрузки типа'] = 0
     df_trub_length['Порядок выгрузки типа'] = 1
     df_metal_length['Порядок выгрузки типа'] = 2
@@ -1291,17 +1290,31 @@ def get_kj():
     # TODO: сгруппировать марки кабелей по описанию
 
     # К каждой таблице с длиной присоединить описание
+
     df_cab_length = df_cab_length.merge(
         df_cab_desc,
         how="left",
         left_on="Позиция",
         right_on="Наименование"
     ).fillna('')
+
+    # Упорядочить по условию из описания и сопутствующих столбцов
     # df_cab_length.sort_values(by=[], ascending=[], inplace=True)
+
+    # Сбросить индексы, сохранить индексы, для сортировки внутри одного типа
     # df_cab_length = df_cab_length[[]].copy()
     df_cab_length.reset_index(drop=True, inplace=True)
     df_cab_length['Сортировка внутри типа'] = df_cab_length.index
 
+    # Избавиться от лишних столбцов
+    # df_cab_length = df_cab_length[[
+    #     'Позиция',
+    #     'Длина',
+    #     'Описание',
+    #     'Примечание',
+    #     'Порядок выгрузки типа',
+    #     'Сортировка внутри типа'
+    # ]]
 
     df_trub_length = df_trub_length.merge(
         df_trub_desc,
@@ -1314,7 +1327,6 @@ def get_kj():
     df_trub_length.reset_index(drop=True, inplace=True)
     df_trub_length['Сортировка внутри типа'] = df_trub_length.index
 
-
     df_metal_length = df_metal_length.merge(
         df_metal_desc,
         how="left",
@@ -1326,6 +1338,42 @@ def get_kj():
     df_metal_length.reset_index(drop=True, inplace=True)
     df_metal_length['Сортировка внутри типа'] = df_metal_length.index
 
+    df_out = pd.concat([df_cab_length, df_trub_length, df_metal_length]).reset_index(drop=True)
+    df_out = df_out[[
+        'Позиция',
+        'Длина',
+        'Описание',
+        'Примечание',
+        'Порядок выгрузки типа',
+        'Сортировка внутри типа'
+    ]]
+
+    # df_out['Сортировка глобальная'] = df_out.index
+    df_out['Сортировка описания/позиция'] = 1
+
+    df_cab_desc = df_out.copy()
+    df_cab_desc['Позиция'] = df_cab_desc['Описание']
+    df_cab_desc['Сортировка описания/позиция'] = 0
+
+    df_out = pd.concat([df_out, df_cab_desc]).reset_index(drop=True)
+    df_out.sort_values(by=[
+        # 'Сортировка глобальная',
+        'Порядок выгрузки типа',
+        'Сортировка внутри типа',
+        'Сортировка описания/позиция'
+        ],
+        ascending=[True, True, True],
+        inplace=True)
+    df_out.drop_duplicates(subset=['Позиция'], inplace=True)
+    df_out['Пустой столбец'] = ''
+    df_out = df_out[[
+        'Пустой столбец',
+        'Позиция',
+        'Длина',
+        'Примечание'
+    ]]
+    df_out = df_out.astype(str)
+    #
 
     # Упорядочить по условию из описания и сопутствующих столбцов
     # Сбросить индексы, сохранить индексы, для сортировки внутри одного типа
@@ -1334,34 +1382,7 @@ def get_kj():
     # Сделать concate
     # Удалить повторяющиеся строки по столбцу Марка (Должны удалиться только повторные строки описания)
     print('')
-
-
-    df_cab_length["Длина кабеля"] = pd.to_numeric(
-        df_cab_length["Длина кабеля"],
-        downcast='integer',
-        errors='coerce'
-    )
-    df_cab_length["Длина кабеля"].replace(np.NAN, 0, inplace=True)
-    df_cab_length = df_cab_length.groupby(by=['Марка кабеля']).agg({"Длина кабеля": 'sum'}).reset_index()
-    df_cab_length["Длина кабеля"] = df_cab_length["Длина кабеля"].astype('int').astype('str')
-
-    df_trub_length = df[(df["Труба"] != '') & (df["Труба"] != '-')].copy()
-
-
-    df_cab_length = df_cab_length.merge(
-        df_cab,
-        how='left',
-        left_on='Марка кабеля',
-        right_on='Наименование'
-    ).fillna('')
-
-    df_cab_length['index'] = df_cab_length.id
-    df_cab_length['Сортировка'] = 1
-
-
-    df_cab_desc = df_cab_length[['Марка кабеля', 'Описание']]
-    df_cab_desc.columns = []
-    print('')
     return
+
 
 a = get_kj()
