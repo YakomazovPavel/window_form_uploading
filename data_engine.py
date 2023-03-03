@@ -1301,9 +1301,9 @@ def get_kj():
     # Упорядочить по условию из описания и сопутствующих столбцов
     # df_cab_length.sort_values(by=[], ascending=[], inplace=True)
 
-    # Сбросить индексы, сохранить индексы, для сортировки внутри одного типа
-    # df_cab_length = df_cab_length[[]].copy()
+    # Сбросить индексы
     df_cab_length.reset_index(drop=True, inplace=True)
+    # Сохранить индексы, для сортировки внутри одного типа
     df_cab_length['Сортировка внутри типа'] = df_cab_length.index
 
     # Избавиться от лишних столбцов
@@ -1323,7 +1323,6 @@ def get_kj():
         right_on="Марка"
     ).fillna('')
     # df_trub_length.sort_values(by=[], ascending=[], inplace=True)
-    # df_trub_length = df_trub_length[[]].copy()
     df_trub_length.reset_index(drop=True, inplace=True)
     df_trub_length['Сортировка внутри типа'] = df_trub_length.index
 
@@ -1334,7 +1333,6 @@ def get_kj():
         right_on="Марка"
     ).fillna('')
     # df_trub_length.sort_values(by=[], ascending=[], inplace=True)
-    # df_trub_length = df_trub_length[[]].copy()
     df_metal_length.reset_index(drop=True, inplace=True)
     df_metal_length['Сортировка внутри типа'] = df_metal_length.index
 
@@ -1381,8 +1379,9 @@ def get_kj():
     # Сделать копию, заменить значения столбца Марка на описание
     # Сделать concate
     # Удалить повторяющиеся строки по столбцу Марка (Должны удалиться только повторные строки описания)
-    print('')
-    return
+    # print('')
+    return df, df_out
 
 
-a = get_kj()
+# a = get_kj()
+# print('')

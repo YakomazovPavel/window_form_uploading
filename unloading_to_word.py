@@ -1,7 +1,8 @@
 import os
 from docx import Document
 from copy import deepcopy
-# from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp
+from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp, \
+    get_kj
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from paths import SETTINGS
@@ -154,9 +155,9 @@ def unload_ol(template_path, template, save_path, save_name, data_func):
 #     temp_res = data_func()
 
 
-# Заполнение таблиц построчно
+# Заполнение таблиц построчно (без шаблона, df изначально соответсвует передаваемой таблице)
 
-def write_table(table, df, not_centr_column, row_shift=0):
+def write_table(table, df, not_centr_column=[], row_shift=0):
     # values = df.values
     count = table._column_count
     for row_idx in range(1, df.shape[0] + row_shift):
@@ -167,6 +168,7 @@ def write_table(table, df, not_centr_column, row_shift=0):
             # clls[column_idx + row_idx * count].text = str(values[row_idx, column_idx])
             cell = clls[column_idx + (row_idx + row_shift) * count]
             cell.text = str(df.iloc[row_idx, column_idx])
+            # Изменения стиля, шрифта и размера
             # cell_style(cell, 10)
             paragra_ph = cell.paragraphs[0]
             # paragra_ph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -174,7 +176,7 @@ def write_table(table, df, not_centr_column, row_shift=0):
             font.name = 'Arial'
             font.size = Pt(10)
 
-            # Выравнивание
+            # Выравнивание всех столбцов, кроме not_centr_column
             if column_idx not in not_centr_column:
                 # paragra_ph = cell.paragraphs[0]
                 paragra_ph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -189,7 +191,8 @@ def unloading_doc(template_path, save_path, save_name, data_func, not_centr_colu
     df = data_func()
     write_table(table, df, not_centr_column, row_shift)
     document.save(full_save_path)
-    print(f'Документ {save_name}.docx выгружен')
+    # print(f'Документ {save_name}.docx выгружен')
+
 
 # def
 
@@ -219,3 +222,22 @@ def unloading_doc(template_path, save_path, save_name, data_func, not_centr_colu
 #     data_func=get_tsp,
 #     row_shift=1
 # )
+# unload_ol(template_path, template, save_path, save_name, data_func):
+
+def unloading_kj(template_path, save_path, save_name, data_func):
+    full_save_path = os.path.join(save_path, save_name + '.docx')
+    document = Document(template_path)
+    table_kj_list = document.tables[-1]
+    table_kj_desc = document.tables[-2]
+    df_list, df_desc = data_func()
+    write_table(table_kj_list, df_list, row_shift=1)
+    write_table(table_kj_desc, df_desc, row_shift=1)
+    document.save(full_save_path)
+
+
+unloading_kj(
+    template_path=SETTINGS['file_dir_kj_template'],
+    save_path=SETTINGS['dir_kj_save_directory'],
+    save_name=SETTINGS['file_name_kj'],
+    data_func=get_kj
+)
