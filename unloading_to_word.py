@@ -128,7 +128,12 @@ def unload_ol(template_path, template, save_path, save_name, data_func):
 
     document.save(full_save_path)
 
-
+# unload_ol(
+#                 template_path=SETTINGS["file_dir_flow_template"],
+#                 template=SETTINGS["template_flow"],
+#                 save_path=SETTINGS["dir_ol_save_directory"],
+#                 save_name=SETTINGS["file_name_flow_ol"],
+#                 data_func=getFlowForOL)
 # t_ol = getTemptureForOL()
 # print('HI')
 #
@@ -235,9 +240,9 @@ def unloading_kj(template_path, save_path, save_name, data_func):
     document.save(full_save_path)
 
 
-unloading_kj(
-    template_path=SETTINGS['file_dir_kj_template'],
-    save_path=SETTINGS['dir_kj_save_directory'],
-    save_name=SETTINGS['file_name_kj'],
-    data_func=get_kj
-)
+# unloading_kj(
+#     template_path=SETTINGS['file_dir_kj_template'],
+#     save_path=SETTINGS['dir_kj_save_directory'],
+#     save_name=SETTINGS['file_name_kj'],
+#     data_func=get_kj
+# )

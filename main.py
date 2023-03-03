@@ -4,17 +4,17 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
 from PySide6 import QtUiTools, QtCore
 from paths import DOC_NAME, BASE_DIR, SETTINGS, save_json_file
-from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL
-from unloading_to_word import unload_ol
+# from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL
+from unloading_to_word import unload_ol, unloading_doc, unloading_kj
 import multiprocessing
 from multiprocessing import Process
+from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp, get_kj
 
 
-def deamon_start_process(func, *args, **kwargs):
+def start_deamon(func, *args, **kwargs):
     process = Process(target=func, args=args, kwargs=kwargs)
     process.daemon = False
     process.start()
-
 
 # Добавить переменную, хранящую последний указанный путь пользователем (отрезать файл на конце, если указывался шаблон)
 
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         #     lambda: self.unloading_t_ol())
 
         self.ui.push_btn_uploading_temperature.clicked.connect(
-            lambda: self.start_deamon(
+            lambda: start_deamon(
                 unload_ol,
                 template_path=SETTINGS["file_dir_temperature_template"],
                 template=SETTINGS["template_temperature"],
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
                 data_func=getTemptureForOL))
 
         self.ui.push_btn_uploading_pressure.clicked.connect(
-            lambda: self.start_deamon(
+            lambda: start_deamon(
                 unload_ol,
                 template_path=SETTINGS["file_dir_pressure_template"],
                 template=SETTINGS["template_pressure"],
@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
                 data_func=getPressureForOL))
 
         self.ui.push_btn_uploading_flow.clicked.connect(
-            lambda: self.start_deamon(
+            lambda: start_deamon(
                 unload_ol,
                 template_path=SETTINGS["file_dir_flow_template"],
                 template=SETTINGS["template_flow"],
@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
                 data_func=getFlowForOL))
 
         self.ui.push_btn_uploading_level.clicked.connect(
-            lambda: self.start_deamon(
+            lambda: start_deamon(
                 unload_ol,
                 template_path=SETTINGS["file_dir_level_template"],
                 template=SETTINGS["template_level"],
@@ -126,34 +126,77 @@ class MainWindow(QMainWindow):
                 save_name=SETTINGS["file_name_level_ol"],
                 data_func=getLevelForOL))
 
+        self.ui.push_btn_uploading_io.clicked.connect(
+            lambda: start_deamon(
+                unloading_doc,
+                template_path=SETTINGS['file_dir_io_template'],
+                save_path=SETTINGS['dir_io_save_directory'],
+                save_name=SETTINGS['file_name_io'],
+                data_func=get_io,
+                row_shift=2
+            ))
+
+        self.ui.push_btn_uploading_tsp.clicked.connect(
+            lambda: start_deamon(
+                unloading_doc,
+                template_path=SETTINGS['file_dir_tsp_template'],
+                save_path=SETTINGS['dir_tsp_save_directory'],
+                save_name=SETTINGS['file_name_tsp'],
+                data_func=get_tsp,
+                row_shift=1
+            )
+        )
+
+        self.ui.push_btn_uploading_kj.clicked.connect(
+            lambda: start_deamon(
+                unloading_kj,
+                template_path=SETTINGS['file_dir_kj_template'],
+                save_path=SETTINGS['dir_kj_save_directory'],
+                save_name=SETTINGS['file_name_kj'],
+                data_func=get_kj
+            )
+        )
+
+        self.ui.push_btn_uploading_spec.clicked.connect(
+            lambda: start_deamon(
+                unloading_doc,
+                template_path=SETTINGS['file_dir_specification_template'],
+                save_path=SETTINGS['dir_specifaication_save_directory'],
+                save_name=SETTINGS['file_name_specification'],
+                data_func=get_spec,
+                not_centr_column=[1]
+            )
+        )
+
+
     # @QtCore.Slot()
 
-    def unloading_t_ol(self):
-        print('Выгрузка началась!')
-        # t_ol = getTemptureForOL()
-        # deamon_start_process(
-        #     unload_ol,
-        #     template_path=SETTINGS["file_dir_temperature_template"],
-        #     template=SETTINGS["template_temperature"],
-        #     save_path=SETTINGS["dir_ol_save_directory"],
-        #     save_name=SETTINGS["file_name_temperature_ol"],
-        #     df_table_list_positions=t_ol[0],
-        #     df_ol_table=t_ol[1]
-        # )
-        deamon_start_process(
-            unload_ol,
-            template_path=SETTINGS["file_dir_temperature_template"],
-            template=SETTINGS["template_temperature"],
-            save_path=SETTINGS["dir_ol_save_directory"],
-            save_name=SETTINGS["file_name_temperature_ol"],
-            data_func=getTemptureForOL
-        )
-        # self.text.setText(random.choice(self.hello))
+    # def unloading_t_ol(self):
+    #     print('Выгрузка началась!')
+    #     # t_ol = getTemptureForOL()
+    #     # deamon_start_process(
+    #     #     unload_ol,
+    #     #     template_path=SETTINGS["file_dir_temperature_template"],
+    #     #     template=SETTINGS["template_temperature"],
+    #     #     save_path=SETTINGS["dir_ol_save_directory"],
+    #     #     save_name=SETTINGS["file_name_temperature_ol"],
+    #     #     df_table_list_positions=t_ol[0],
+    #     #     df_ol_table=t_ol[1]
+    #     # )
+    #     deamon_start_process(
+    #         unload_ol,
+    #         template_path=SETTINGS["file_dir_temperature_template"],
+    #         template=SETTINGS["template_temperature"],
+    #         save_path=SETTINGS["dir_ol_save_directory"],
+    #         save_name=SETTINGS["file_name_temperature_ol"],
+    #         data_func=getTemptureForOL
+    #     )
+    # self.text.setText(random.choice(self.hello))
 
-    def start_deamon(self, func, *args, **kwargs):
-        process = Process(target=func, args=args, kwargs=kwargs)
-        process.daemon = False
-        process.start()
+    # def start_deamon(self, func, *args, **kwargs):
+    #     process = Process(target=func, args=args, kwargs=kwargs)
+    #     process.daemon = False
+    #     process.start()
 
     # Выбор шаблона
     def select_template(self, key):
