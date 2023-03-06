@@ -1,20 +1,24 @@
 import sys
 import os
+# from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
-from PySide6 import QtUiTools, QtCore
+# from PySide6 import QtUiTools, QtCore
 from paths import DOC_NAME, BASE_DIR, SETTINGS, save_json_file
 # from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL
 from unloading_to_word import unload_ol, unloading_doc, unloading_kj
-import multiprocessing
+# import multiprocessing
+from multiprocessing import freeze_support
 from multiprocessing import Process
-from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp, get_kj
+from data_engine import getTemptureForOL, getPressureForOL, getFlowForOL, getLevelForOL, get_spec, get_io, get_tsp, \
+    get_kj
 
 
 def start_deamon(func, *args, **kwargs):
     process = Process(target=func, args=args, kwargs=kwargs)
     process.daemon = False
     process.start()
+
 
 # Добавить переменную, хранящую последний указанный путь пользователем (отрезать файл на конце, если указывался шаблон)
 
@@ -168,7 +172,6 @@ class MainWindow(QMainWindow):
             )
         )
 
-
     # @QtCore.Slot()
 
     # def unloading_t_ol(self):
@@ -200,7 +203,17 @@ class MainWindow(QMainWindow):
 
     # Выбор шаблона
     def select_template(self, key):
-        dir = QFileDialog.getOpenFileName(self, "Open Directory", self.last_path, "Word (*.docx)")
+        current_path = BASE_DIR
+        path = str(SETTINGS[key])
+        if path != '' and os.path.exists(path):
+            current_path = SETTINGS[key]
+        # current_path = SETTINGS[key] if SETTINGS[key] != '' else BASE_DIR
+        # dir = QFileDialog.getOpenFileName(self, "Open Directory", self.last_path, "Word (*.docx)")
+        dir = QFileDialog.getOpenFileName(self, "Open Directory", current_path, "Word (*.docx)")
+        # print(dir)
+        # print(dir == ('', ''))
+        if dir == ('', ''):
+            return
         SETTINGS[key] = dir[0]
         self.last_path = os.path.split(dir[0])[0]
         # print(self.last_path)
@@ -239,7 +252,15 @@ class MainWindow(QMainWindow):
 
     # Выбор общей дирректории
     def select_directory(self, key):
-        dir = QFileDialog.getExistingDirectory(self, "Open Directory", self.last_path)
+        current_path = BASE_DIR
+        path = str(SETTINGS[key])
+        if path != '' and os.path.exists(path):
+            current_path = SETTINGS[key]
+        dir = QFileDialog.getExistingDirectory(self, "Open Directory", current_path)
+        if dir == '':
+            return
+        # print(f'Директория:[{dir}]')
+        # print(dir == '')
         SETTINGS[key] = dir
         self.last_path = dir
         # print(self.last_path)
@@ -254,7 +275,7 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
+    freeze_support()
     app = QApplication(sys.argv)
 
     window = MainWindow()

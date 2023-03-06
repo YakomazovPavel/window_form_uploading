@@ -1086,6 +1086,12 @@ def get_tsp():
 
     # TODO: отсортировать ТСП в нужном порядке
 
+    df_tsp.sort_values(
+        by=['Шкаф', 'Соединительная коробка', 'Клемма коробки'],
+        ascending=[True, True, True],
+        inplace=True
+    )
+
     return df_tsp
 
 
@@ -1147,6 +1153,7 @@ def get_kj():
         'Кабель местный',
         'Соединительная коробка'
     ]].copy()
+    df_mes_cab['Коробка'] = df_mes_cab['Соединительная коробка']
 
     df_mag_cab = df_tsp[
         (df_tsp['Соединительная коробка'] != '') &
@@ -1157,6 +1164,7 @@ def get_kj():
         'Кабель магистральный',
         'Шкаф'
     ]].copy()
+    df_mag_cab['Коробка'] = df_mag_cab['Соединительная коробка']
 
     df_prm_cab_mes = df_tsp[
         # (df_tsp['Позиция'] != '') &
@@ -1166,8 +1174,11 @@ def get_kj():
         ][[
         'Позиция',
         'Кабель местный',
-        'Шкаф'
+        'Шкаф',
+        'Соединительная коробка'
     ]].copy()
+    df_prm_cab_mes['Коробка'] = df_prm_cab_mes['Соединительная коробка']
+    df_prm_cab_mes.drop('Соединительная коробка', axis=1, inplace=True)
 
     df_prm_cab_mag = df_tsp[
         # (df_tsp['Позиция'] != '') &
@@ -1177,11 +1188,14 @@ def get_kj():
         ][[
         'Позиция',
         'Кабель магистральный',
-        'Шкаф'
+        'Шкаф',
+        'Соединительная коробка'
     ]].copy()
+    df_prm_cab_mag['Коробка'] = df_prm_cab_mag['Соединительная коробка']
+    df_prm_cab_mag.drop('Соединительная коробка', axis=1, inplace=True)
 
     for df in [df_mes_cab, df_mag_cab, df_prm_cab_mes, df_prm_cab_mag]:
-        df.columns = ['Откуда', 'Номер кабеля', 'Куда']
+        df.columns = ['Откуда', 'Номер кабеля', 'Куда', 'Коробка']
 
     df_mes_cab['Порядок выгрузки'] = 0
     df_mag_cab['Порядок выгрузки'] = 1
@@ -1194,6 +1208,8 @@ def get_kj():
         df_prm_cab_mes,
         df_prm_cab_mag
     ]).reset_index(drop=True)
+    df.drop_duplicates(subset=['Номер кабеля'], inplace=True)
+    # print('')
 
     # TODO: формирования второй таблицы для кж
 
@@ -1265,6 +1281,28 @@ def get_kj():
         ["Длина кабеля", "Длина трубы", "Длина металлорукава"]].replace(np.NAN, 0)
     df[["Длина кабеля", "Длина трубы", "Длина металлорукава"]] = df[
         ["Длина кабеля", "Длина трубы", "Длина металлорукава"]].round(0).astype(int)
+
+    df_out_list = df.copy()
+
+    df_out_list['Порядок выгрузки прямыл кабелей'] = np.where((
+            df_out_list['Коробка'] != ''), False, True)
+    df_out_list = df_out_list.sort_values(
+        by=['Порядок выгрузки прямыл кабелей', 'Коробка', 'Порядок выгрузки', 'Номер кабеля'],
+        ascending=[True, True, True, True]).fillna('')
+    df_out_list = df_out_list[[
+        'Номер кабеля',
+        'Откуда',
+        'Куда',
+        'Марка кабеля',
+        'Длина кабеля',
+        'Труба',
+        'Длина трубы',
+        'Металлорукав',
+        'Длина металлорукава',
+        'Примечание'
+        ]].astype(str)
+    # df_out_list = df_out_list.loc[:, :'Примечание']
+    # print('')
 
     df_cab_length = df[df["Марка кабеля"] != ''][["Марка кабеля", "Длина кабеля"]].copy()
     df_trub_length = df[(df["Труба"] != '') & (df["Труба"] != '-')][["Труба", "Длина трубы"]].copy()
@@ -1359,7 +1397,7 @@ def get_kj():
         'Порядок выгрузки типа',
         'Сортировка внутри типа',
         'Сортировка описания/позиция'
-        ],
+    ],
         ascending=[True, True, True],
         inplace=True)
     df_out.drop_duplicates(subset=['Позиция'], inplace=True)
@@ -1380,8 +1418,9 @@ def get_kj():
     # Сделать concate
     # Удалить повторяющиеся строки по столбцу Марка (Должны удалиться только повторные строки описания)
     # print('')
-    return df, df_out
+    return df_out_list, df_out
 
 
 # a = get_kj()
-# print('')
+b = get_tsp()
+print('')
