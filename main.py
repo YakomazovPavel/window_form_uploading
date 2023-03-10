@@ -1,5 +1,9 @@
 import sys
 import os
+# import webbrowser
+# import subprocess
+from subprocess import Popen
+from webbrowser import open
 # from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
 from MainWindow_V2 import Ui_MainWindow
@@ -172,6 +176,32 @@ class MainWindow(QMainWindow):
             )
         )
 
+        self.ui.push_btn_open_uploading_directory.clicked.connect(
+            lambda: self.open_dir(
+                path=os.path.abspath(SETTINGS["dir_shared_save_directory"])
+            )
+        )
+
+        self.ui.push_btn_open_templates_directory.clicked.connect(
+            lambda: self.open_dir(
+                path=os.path.abspath(SETTINGS["file_dir_all_template"])
+            )
+        )
+
+        self.ui.push_btn_open_database.clicked.connect(
+            lambda: self.open_link(
+                link=SETTINGS["link_database"]
+            )
+        )
+
+        self.ui.push_btn_open_reference_database.clicked.connect(
+            lambda: self.open_link(
+                link=SETTINGS["link_reference_database"]
+            )
+        )
+
+
+
     # @QtCore.Slot()
 
     # def unloading_t_ol(self):
@@ -196,10 +226,22 @@ class MainWindow(QMainWindow):
     #     )
     # self.text.setText(random.choice(self.hello))
 
+
     # def start_deamon(self, func, *args, **kwargs):
     #     process = Process(target=func, args=args, kwargs=kwargs)
     #     process.daemon = False
     #     process.start()
+
+
+    # Открыть директорию выгрузки
+    def open_dir(self, path):
+        Popen(fr'explorer "{path}"', shell=True)
+
+
+    # Открыть ссылку в браузере в новой вкладке
+    def open_link(self, link):
+        open(link, new=2)
+
 
     # Выбор шаблона
     def select_template(self, key):

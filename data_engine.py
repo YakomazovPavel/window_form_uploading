@@ -1421,6 +1421,5 @@ def get_kj():
     return df_out_list, df_out
 
 
-# a = get_kj()
-b = get_tsp()
+a = get_tsp()
 print('')
