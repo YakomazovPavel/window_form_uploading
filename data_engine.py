@@ -1,3 +1,5 @@
+import copy
+
 from connections import connectiondef
 import pandas as pd
 import numpy as np
@@ -632,6 +634,47 @@ def getLevelForOL():
 """
 
 
+def func1(item1, item2):
+    item1 = copy.copy(item1)
+    item2 = copy.copy(item2)
+    out = []
+    for i, j  in zip(item1, item2):
+        if i == '-' or i == '' or j == '-' or j == '':
+            out.append('-')
+            continue
+        a = i
+        b = j
+        do_slesha = b[:b.find('/')]
+        posle_slesha = b[b.find('/')+1:]
+        str = a + ':' + do_slesha + '\n' + a + ':' + posle_slesha
+        out.append(str)
+    s = pd.Series(out)
+    return s
+
+
+def func2(item):
+    s = copy.copy(item)
+    first_number = []
+    second_number = []
+    for item in s:
+        first_n = int(item[:item.find('A')])
+        second_n = int(item[item.find('A')+1:])
+        first_number.append(first_n)
+        second_number.append(second_n)
+    first_number = pd.Series(first_number)
+    second_number = pd.Series(second_number)
+
+
+    return first_number, second_number
+
+# def create_element_clemma(df):
+#     df = df
+#     for index, row in df.iterrows():
+#         index1 = index
+#         row1 = row
+#         print('')
+#     print('')
+
 def get_io():
     arrya_io = connectiondef('ИО')
     df_io = pd.DataFrame(arrya_io[1:], columns=arrya_io[0])[
@@ -650,7 +693,14 @@ def get_io():
          "Шкаф",
          "Модуль",
          "Канал",
+         'Элемент',
+         'Клемма',
          "Тип сх.подкл."]].fillna('')
+
+    df_io["Элемент:клемма"] = func1(df_io["Элемент"], df_io["Клемма"])
+    # df_io["Элемент:клемма"] = create_element_clemma(df_io[["Элемент", "Клемма"]])
+    df_io["Модуль_число1"],  df_io["Модуль_число2"] = func2(df_io["Модуль"])
+
 
     arrya_pp = connectiondef('Перечень приборов')
     df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[["Позиция",
@@ -728,6 +778,14 @@ def get_io():
 
     del all_device_df
 
+    df_io["Канал"] = pd.to_numeric(
+        df_io["Канал"],
+        downcast='integer',
+        errors='coerce'
+    ).replace(np.NAN, 0)
+
+    df_io.sort_values(by=['Шкаф', 'Модуль_число1', 'Модуль_число2', 'Канал'], ascending=[True, True, True, True], inplace=True)
+
     df_io = df_io[['Позиция',
                    'Назначение сигнала',
                    'Тип сигнала',
@@ -742,11 +800,15 @@ def get_io():
                    'Шкаф',
                    'Модуль',
                    'Канал',
+                   'Элемент:клемма',
                    'Тег сигнала',
                    'Перечень управляющих воздействий',
                    'Тип сх.подкл.',
                    'Примечание']].copy()
-    df_io.sort_values(by=['Шкаф', 'Модуль', 'Канал'], ascending=[True, True, True], inplace=True)
+
+    # print('')
+
+
     # TODO: настроить правильную сортировку строк в ИО
     # TODO: добавить вставку строки на всю длину таблицы с обозначением шкафа
     return df_io
@@ -1421,5 +1483,6 @@ def get_kj():
     return df_out_list, df_out
 
 
-a = get_tsp()
-print('')
+# a = get_tsp()
+# b = get_io()
+# print('')
