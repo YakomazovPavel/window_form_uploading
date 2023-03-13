@@ -353,6 +353,7 @@ def joinUniqu(x):
 #         'Примечание': (50, 4)
 #     }
 # }
+
 def check_column_name(db_col_name, template_col_name):
     col_temp = np.array(list(template_col_name))
     mask = np.in1d(col_temp, db_col_name)
@@ -634,38 +635,39 @@ def getLevelForOL():
 """
 
 
+# Функция склеивающая элемент:клемма \n элемент:клемма
 def func1(item1, item2):
     item1 = copy.copy(item1)
     item2 = copy.copy(item2)
     out = []
-    for i, j  in zip(item1, item2):
+    for i, j in zip(item1, item2):
         if i == '-' or i == '' or j == '-' or j == '':
             out.append('-')
             continue
         a = i
         b = j
         do_slesha = b[:b.find('/')]
-        posle_slesha = b[b.find('/')+1:]
+        posle_slesha = b[b.find('/') + 1:]
         str = a + ':' + do_slesha + '\n' + a + ':' + posle_slesha
         out.append(str)
     s = pd.Series(out)
     return s
 
 
+# Функция разделяющая столбец на 2 столбца, доставая числа до символа А и после символа А
 def func2(item):
     s = copy.copy(item)
     first_number = []
     second_number = []
     for item in s:
         first_n = int(item[:item.find('A')])
-        second_n = int(item[item.find('A')+1:])
+        second_n = int(item[item.find('A') + 1:])
         first_number.append(first_n)
         second_number.append(second_n)
     first_number = pd.Series(first_number)
     second_number = pd.Series(second_number)
-
-
     return first_number, second_number
+
 
 # def create_element_clemma(df):
 #     df = df
@@ -674,6 +676,7 @@ def func2(item):
 #         row1 = row
 #         print('')
 #     print('')
+
 
 def get_io():
     arrya_io = connectiondef('ИО')
@@ -699,8 +702,7 @@ def get_io():
 
     df_io["Элемент:клемма"] = func1(df_io["Элемент"], df_io["Клемма"])
     # df_io["Элемент:клемма"] = create_element_clemma(df_io[["Элемент", "Клемма"]])
-    df_io["Модуль_число1"],  df_io["Модуль_число2"] = func2(df_io["Модуль"])
-
+    df_io["Модуль_число1"], df_io["Модуль_число2"] = func2(df_io["Модуль"])
 
     arrya_pp = connectiondef('Перечень приборов')
     df_pp = pd.DataFrame(arrya_pp[1:], columns=arrya_pp[0])[["Позиция",
@@ -784,7 +786,8 @@ def get_io():
         errors='coerce'
     ).replace(np.NAN, 0)
 
-    df_io.sort_values(by=['Шкаф', 'Модуль_число1', 'Модуль_число2', 'Канал'], ascending=[True, True, True, True], inplace=True)
+    df_io.sort_values(by=['Шкаф', 'Модуль_число1', 'Модуль_число2', 'Канал'], ascending=[True, True, True, True],
+                      inplace=True)
 
     df_io = df_io[['Позиция',
                    'Назначение сигнала',
@@ -805,8 +808,6 @@ def get_io():
                    'Тег сигнала',
                    'Перечень управляющих воздействий',
                    'Примечание']].copy()
-
-    # print('')
 
 
     # TODO: настроить правильную сортировку строк в ИО
@@ -1362,7 +1363,7 @@ def get_kj():
         'Металлорукав',
         'Длина металлорукава',
         'Примечание'
-        ]].astype(str)
+    ]].astype(str)
     # df_out_list = df_out_list.loc[:, :'Примечание']
     # print('')
 
@@ -1481,7 +1482,6 @@ def get_kj():
     # Удалить повторяющиеся строки по столбцу Марка (Должны удалиться только повторные строки описания)
     # print('')
     return df_out_list, df_out
-
 
 # a = get_tsp()
 # b = get_io()
